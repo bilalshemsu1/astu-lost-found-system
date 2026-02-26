@@ -27,7 +27,7 @@ class AuthController extends Controller
         ]);
 
         // Check if validation fails
-        if (!$validator) {
+        if ($validator->fails()) {
             return back()
                 ->withErrors($validator);
         }
@@ -60,7 +60,7 @@ class AuthController extends Controller
         ]);
 
         // Check if validation fails
-        if (!$validator) {
+        if ($validator->fails()) {
             return back()
                 ->withErrors($validator);
         }

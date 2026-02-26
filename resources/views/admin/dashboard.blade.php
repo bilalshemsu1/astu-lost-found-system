@@ -8,5 +8,9 @@
 </head>
 <body>
     <h1>Admin Dashboard</h1>
+    <form action="{{route('logout')}}" method="post">
+        @csrf
+        <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
 </body>
 </html>
