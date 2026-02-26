@@ -16,10 +16,14 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/student', function () {
-    return view('student.dashboard');
-})->name('student.dashboard');
+Route::middleware(['auth'])->group(function (){
+    Route::get('/student', function () {
+        return view('student.dashboard');
+    })->name('student.dashboard');
 
-Route::get('/admin', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
+    Route::middleware(['admin'])->group(function (){
+        Route::get('/admin', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+    });
+});
