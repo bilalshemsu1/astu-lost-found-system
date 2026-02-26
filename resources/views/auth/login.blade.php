@@ -71,7 +71,14 @@
             </div>
 
             <!-- Form -->
-            <form id="loginForm" class="px-6 pb-6 space-y-5" novalidate>
+            <form id="loginForm" class="px-6 pb-6 space-y-5" novalidate action="{{route('login')}}" method="POST">
+                @if(session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                
+                @csrf
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -85,7 +92,9 @@
                             placeholder="your.email@astu.edu.et"
                             required
                     >
-                    <p id="emailError" class="mt-1.5 text-sm text-red-600 hidden"></p>
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Password -->
@@ -114,7 +123,9 @@
                             </svg>
                         </button>
                     </div>
-                    <p id="passwordError" class="mt-1.5 text-sm text-red-600 hidden"></p>
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Submit Button -->
@@ -135,7 +146,7 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-4">
     <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-400">
-        © 2026 ASTU Lost & Found. All rights reserved.
+        © {{ date('Y') }} ASTU Lost & Found. All rights reserved.
     </div>
 </footer>
 

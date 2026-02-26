@@ -70,8 +70,16 @@
                 <p class="text-gray-500 text-sm">Join the ASTU Lost & Found community</p>
             </div>
 
+            @if(session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+            
             <!-- Form -->
-            <form id="registerForm" class="px-6 pb-6 space-y-5" novalidate>
+            <form id="registerForm" class="px-6 pb-6 space-y-5" action="{{route('register.store')}}" method="POST" novalidate>
+                
+                @csrf
                 <!-- Name -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -85,7 +93,30 @@
                             placeholder="Enter your full name"
                             required
                             minlength="2"
+                            value="{{ old('email') }}"
                     >
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <!-- Student ID -->
+                <div>
+                    <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Student Id
+                    </label>
+                    <input
+                            type="text"
+                            id="student_id"
+                            name="student_id"
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                            placeholder="Enter your Student Id, Eg: UGR/*****/**"
+                            required
+                            minlength="2"
+                            value="{{ old('email') }}"
+                    >
+                    @error('student_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Email -->
@@ -100,7 +131,11 @@
                             class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                             placeholder="your.email@astu.edu.et"
                             required
+                            value="{{ old('email') }}"
                     >
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Password -->
@@ -124,22 +159,24 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                         </button>
+
                     </div>
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Confirm Password -->
                 <div>
-                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">
                         Confirm Password
                     </label>
-                    <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
-                            placeholder="Re-enter your password"
-                            required
-                    >
+                    <input type="password" id="password_confirmation" name="password_confirmation" 
+                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg..." 
+                        placeholder="Confirm your password" required>
+                    @error('password_confirmation')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Submit Button -->
@@ -160,7 +197,7 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-4">
     <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-400">
-        © 2026 ASTU Lost & Found. All rights reserved.
+        © {{ date('Y') }} ASTU Lost & Found. All rights reserved.
     </div>
 </footer>
 

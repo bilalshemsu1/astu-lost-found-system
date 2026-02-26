@@ -385,7 +385,7 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-4">
     <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-400">
-        © 2026 ASTU Lost & Found. All rights reserved.
+        © {{ date('Y') }} ASTU Lost & Found. All rights reserved.
     </div>
 </footer>
 
