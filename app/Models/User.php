@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -33,4 +34,10 @@ class User extends Authenticatable
         'trust_score' => 'integer',
         'is_anonymous' => 'boolean',
     ];
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class);
+    }
+
 }

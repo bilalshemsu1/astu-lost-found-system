@@ -6,14 +6,20 @@ use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    public function showLostForm()
+
+    public function index()
     {
-        return view('student.post-lost');
+        return view('student.items.index');
     }
 
+    public function showLostForm()
+    {
+        return view('student.items.create-lost');
+    }
+    
     public function showFoundForm()
     {
-        // Logic to retrieve and display form
+        return view('student.items.create-found');
     }
 
     public function postLostItem(Request $request)

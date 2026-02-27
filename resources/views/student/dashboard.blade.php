@@ -27,7 +27,13 @@
                 </svg>
             </button>
             <div>
-                <h1 class="text-base sm:text-lg font-semibold text-gray-900">Welcome, Dawit</h1>
+                <h1 class="text-base sm:text-lg font-semibold text-gray-900">Welcome, 
+                    @php
+                        $nameParts = explode(' ', auth()->user()->name);
+                        $firstName = $nameParts[0] ?? auth()->user()->name;
+                        echo htmlspecialchars($firstName);    
+                    @endphp
+                </h1>
             </div>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
