@@ -118,13 +118,13 @@
 
                     <!-- Date -->
                     <div>
-                        <label for="found_date" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        <label for="item_date" class="block text-sm font-medium text-gray-700 mb-1.5">
                             Date Found <span class="text-red-500">*</span>
                         </label>
                         <input
                                 type="date"
-                                id="found_date"
-                                name="found_date"
+                                id="item_date"
+                                name="item_date"
                                 required
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
