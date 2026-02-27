@@ -26,7 +26,7 @@
     <main class="flex-1 p-4 sm:p-6">
         <div class="max-w-2xl mx-auto">
             <!-- Info Card -->
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+            {{-- <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                 <div class="flex gap-3">
                     <div class="w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
                         <p class="text-xs sm:text-sm text-amber-700 mt-1">After submission, an admin will verify your report. Once verified, our system will automatically search for matches.</p>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- Form Card -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -47,7 +47,7 @@
                     <p class="text-sm text-gray-500 mt-1">Provide as much detail as possible to help find your item</p>
                 </div>
 
-                <form id="lostItemForm" class="p-4 sm:p-6 space-y-5" method="POST" action="{{route('student.lost.post')}}" enctype="multipart/form-data" novalidate>
+                <form class="p-4 sm:p-6 space-y-5" method="POST" action="{{route('student.lost.post')}}" enctype="multipart/form-data" novalidate>
 
                     @csrf
                     <!-- Title -->
@@ -184,9 +184,6 @@
 
                     <!-- Submit Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                        <a href="student-dashboard.html" class="flex-1 py-2.5 px-4 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-center">
-                            Cancel
-                        </a>
                         <button
                                 type="submit"
                                 id="submitBtn"

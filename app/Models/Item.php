@@ -11,7 +11,7 @@ class Item extends Model
         'title',
         'description',
         'category',
-        'type',              // 'lost' or 'found'
+        'type', 
         'verification_status',
         'verification_reason',
         'status',
