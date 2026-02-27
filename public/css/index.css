@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; }
+.sidebar-link.active {
+    background-color: #f0fdfa;
+    color: #0d9488;
+    border-left: 2px solid #0d9488;
+}
+@media (max-width: 1023px) {
+    .sidebar-link.active {
+        border-left: none;
+        border-left: 2px solid #0d9488;
+    }
+}
+.sidebar-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease;
+}
+.sidebar-panel {
+    transition: transform 0.3s ease;
+}
+.sidebar-panel.closed {
+    transform: translateX(-100%);
+}
+@media (min-width: 1024px) {
+    .sidebar-panel.closed {
+        transform: translateX(0);
+    }
+}
