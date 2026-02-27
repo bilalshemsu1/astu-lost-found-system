@@ -5,58 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Lost Item - ASTU Lost & Found</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-link.active {
-            background-color: #f0fdfa;
-            color: #0d9488;
-            border-left: 2px solid #0d9488;
-        }
-        @media (max-width: 1023px) {
-            .sidebar-link.active {
-                border-left: none;
-                border-left: 2px solid #0d9488;
-            }
-        }
-        .sidebar-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            transition: opacity 0.3s ease;
-        }
-        .sidebar-panel {
-            transition: transform 0.3s ease;
-        }
-        .sidebar-panel.closed {
-            transform: translateX(-100%);
-        }
-        @media (min-width: 1024px) {
-            .sidebar-panel.closed {
-                transform: translateX(0);
-            }
-        }
-    </style>
+    <script src="{{ asset('js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
 
@@ -64,29 +15,12 @@
 <div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
 
 <!-- Sidebar -->
-@include('student.layouts.navigation')
+<x-student-navigation/>
 
 <!-- Main Content -->
 <div class="lg:ml-64 min-h-screen flex flex-col">
     <!-- Top Bar -->
-    <header class="h-14 sm:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
-        <div class="flex items-center gap-2 sm:gap-3">
-            <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-            <h1 class="text-base sm:text-lg font-semibold text-gray-900">Report Lost Item</h1>
-        </div>
-        <div class="flex items-center gap-2 sm:gap-4">
-            <div class="hidden sm:flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1.5 rounded-full">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-                <span class="text-sm font-medium">Trust: +3</span>
-            </div>
-        </div>
-    </header>
+    <x-student-header title="Post Lost Items" trustScore="3" />
 
     <!-- Page Content -->
     <main class="flex-1 p-4 sm:p-6">
@@ -113,7 +47,9 @@
                     <p class="text-sm text-gray-500 mt-1">Provide as much detail as possible to help find your item</p>
                 </div>
 
-                <form id="lostItemForm" class="p-4 sm:p-6 space-y-5">
+                <form id="lostItemForm" class="p-4 sm:p-6 space-y-5" method="POST" action="{{route('student.lost.post')}}" enctype="multipart/form-data" novalidate>
+
+                    @csrf
                     <!-- Title -->
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -209,6 +145,7 @@
                                     type="file"
                                     id="image"
                                     name="image"
+                                    multiple
                                     accept="image/jpeg,image/png,image/gif"
                                     class="hidden"
                             >
@@ -283,126 +220,8 @@
     </div>
 </div>
 
-<script>
-    function openSidebar() {
-        if (window.innerWidth >= 1024) return;
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
 
-        sidebar.classList.remove('closed');
-        overlay.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
-
-    function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        sidebar.classList.add('closed');
-        overlay.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-
-    function toggleSidebar() {
-        if (window.innerWidth >= 1024) return;
-        const sidebar = document.getElementById('sidebar');
-
-        if (sidebar.classList.contains('closed')) {
-            openSidebar();
-        } else {
-            closeSidebar();
-        }
-    }
-
-    // Close sidebar when clicking a link on mobile
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 1024) {
-                closeSidebar();
-            }
-        });
-    });
-
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 1024) {
-            closeSidebar();
-        }
-    });
-
-    // Image upload handling
-    const dropZone = document.getElementById('dropZone');
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const removeImage = document.getElementById('removeImage');
-
-    dropZone.addEventListener('click', () => imageInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-primary-400', 'bg-primary-50');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-primary-400', 'bg-primary-50');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-primary-400', 'bg-primary-50');
-        if (e.dataTransfer.files.length) {
-            imageInput.files = e.dataTransfer.files;
-            handleImagePreview(e.dataTransfer.files[0]);
-        }
-    });
-
-    imageInput.addEventListener('change', (e) => {
-        if (e.target.files.length) {
-            handleImagePreview(e.target.files[0]);
-        }
-    });
-
-    function handleImagePreview(file) {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                dropZone.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    removeImage.addEventListener('click', () => {
-        imageInput.value = '';
-        imagePreview.classList.add('hidden');
-        dropZone.classList.remove('hidden');
-    });
-
-    // Form submission
-    const form = document.getElementById('lostItemForm');
-    const successModal = document.getElementById('successModal');
-    const submitBtn = document.getElementById('submitBtn');
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `
-                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-            `;
-
-        // Simulate API call
-        setTimeout(() => {
-            successModal.classList.remove('hidden');
-            successModal.classList.add('flex');
-        }, 1500);
-    });
-</script>
+<script src="{{asset('js/index.js')}}"></script>
+<script src="{{asset('js/post.js')}}"></script>
 </body>
 </html>

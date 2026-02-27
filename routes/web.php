@@ -25,12 +25,16 @@ Route::middleware(['auth'])->group(function (){
 
     // claim routes
     Route::get('/claim', function () {
-        return view('student.claims.index');
+        return view('student.claim');
     })->name('student.claims.show');
     
+    Route::get('/matches', function () {
+        return view('student.matches');
+    })->name('student.matches');
+
     // items routes
     Route::prefix('/items')->group(function () {
-        Route::get('/', [ItemController::class, 'index'])->name('student.items.index');
+        Route::get('/', [ItemController::class, 'index'])->name('student.items');
         Route::get('lost', [ItemController::class, 'showLostForm'])->name('student.lost');
         Route::get('found', [ItemController::class, 'showFoundForm'])->name('student.found');
 
