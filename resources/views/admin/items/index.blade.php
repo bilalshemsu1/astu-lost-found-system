@@ -16,12 +16,22 @@
     <x-admin-header title="All Items" :notificationsCount="$pendingCount + $pendingClaimsCount" />
 
     <main class="flex-1 p-4 sm:p-6">
+        @if(session('success'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
+        @endif
+
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
             <x-admin-stat-card label="Total" :value="$totalItems ?? 0" />
             <x-admin-stat-card label="Lost" :value="$lostItems ?? 0" valueClass="text-red-700" />
             <x-admin-stat-card label="Found" :value="$foundItems ?? 0" valueClass="text-green-700" />
             <x-admin-stat-card label="Returned" :value="$returnedItems ?? 0" valueClass="text-primary-700" />
             <x-admin-stat-card label="Active" :value="$activeItems ?? 0" valueClass="text-amber-700" />
+        </div>
+
+        <div class="mb-4">
+            <a href="{{ route('admin.items.found.create') }}" class="inline-flex px-4 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700">
+                Create Found Item
+            </a>
         </div>
 
         <form method="GET" action="{{ route('admin.items') }}" class="bg-white rounded-xl border border-gray-200 p-4 mb-5">
@@ -32,8 +42,19 @@
                     <option value="lost" {{ request('type') === 'lost' ? 'selected' : '' }}>Lost</option>
                     <option value="found" {{ request('type') === 'found' ? 'selected' : '' }}>Found</option>
                 </select>
-                <input type="text" name="category" value="{{ request('category') }}" placeholder="Category" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
-                <input type="text" name="status" value="{{ request('status') }}" placeholder="Status" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
+                <select name="category" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
+                    <option value="">All Categories</option>
+                    @foreach(($categories ?? []) as $key => $label)
+                        <option value="{{ $key }}" {{ request('category') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <select name="status" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
+                    <option value="">All Statuses</option>
+                    <option value="pending_verification" {{ request('status') === 'pending_verification' ? 'selected' : '' }}>Pending Verification</option>
+                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                </select>
                 <select name="sort" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
                     <option value="recent" {{ request('sort') !== 'oldest' ? 'selected' : '' }}>Most Recent</option>
                     <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest</option>
@@ -60,7 +81,7 @@
                     </div>
                     <div class="p-4">
                         <h3 class="font-medium text-gray-900">{{ $item->title }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">{{ $item->category }} - {{ $item->location }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ ($categories[$item->category] ?? ucfirst($item->category)) }} - {{ $item->location }}</p>
                         <p class="text-xs text-gray-500 mt-1">Owner: {{ $item->user->name ?? 'Unknown' }}</p>
                         <p class="text-xs text-gray-400 mt-2">{{ $item->created_at->diffForHumans() }}</p>
                     </div>

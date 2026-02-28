@@ -16,6 +16,10 @@
     <x-admin-header title="Claims" :notificationsCount="$pendingCount + $pendingClaimsCount" />
 
     <main class="flex-1 p-4 sm:p-6">
+        @if(session('success'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
+        @endif
+
         <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
             <x-admin-stat-card label="Total" :value="$claimsTotal ?? 0" />
             <x-admin-stat-card label="Pending" :value="$claimsPending ?? 0" valueClass="text-amber-700" />
@@ -55,6 +59,7 @@
                     <th class="px-4 py-3 text-left font-medium">Status</th>
                     <th class="px-4 py-3 text-left font-medium">Score</th>
                     <th class="px-4 py-3 text-left font-medium">Date</th>
+                    <th class="px-4 py-3 text-left font-medium">Actions</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -68,13 +73,37 @@
                         </td>
                         <td class="px-4 py-3 text-gray-600">{{ number_format((float) ($claim->similarity_score ?? 0), 1) }}%</td>
                         <td class="px-4 py-3 text-gray-500">{{ $claim->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3">
+                            @if($claim->status === 'pending')
+                                <div class="flex items-center gap-2">
+                                    <form method="POST" action="{{ route('admin.claims.approve', $claim) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.claims.reject', $claim) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="reason" value="Rejected by admin review">
+                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100">Reject</button>
+                                    </form>
+                                </div>
+                            @else
+                                <span class="text-xs text-gray-400">Processed</span>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
-                        <td class="px-4 pb-4 text-xs text-gray-500" colspan="6">Proof: {{ \Illuminate\Support\Str::limit($claim->proof, 180) }}</td>
+                        <td class="px-4 pb-4 text-xs text-gray-500" colspan="7">
+                            Proof: {{ \Illuminate\Support\Str::limit($claim->proof, 180) }}
+                            @if($claim->admin_notes)
+                                <span class="ml-3">Admin Notes: {{ \Illuminate\Support\Str::limit($claim->admin_notes, 120) }}</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">No claims found.</td>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">No claims found.</td>
                     </tr>
                 @endforelse
                 </tbody>

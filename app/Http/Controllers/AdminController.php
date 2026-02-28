@@ -9,7 +9,10 @@ use App\Models\User;
 use App\Services\ItemMatcher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -83,12 +86,15 @@ class AdminController extends Controller
             $query->where('type', $request->string('type')->toString());
         }
 
-        if ($request->filled('status')) {
+        if (in_array($request->string('status')->toString(), ['pending_verification', 'active', 'returned', 'rejected'], true)) {
             $query->where('status', $request->string('status')->toString());
         }
 
         if ($request->filled('category')) {
-            $query->where('category', $request->string('category')->toString());
+            $category = $request->string('category')->toString();
+            if (array_key_exists($category, $this->categories())) {
+                $query->where('category', $category);
+            }
         }
 
         if ($request->filled('search')) {
@@ -114,6 +120,7 @@ class AdminController extends Controller
 
         return view('admin.items.index', array_merge([
             'items' => $items,
+            'categories' => $this->categories(),
             'totalItems' => Item::count(),
             'lostItems' => Item::where('type', 'lost')->count(),
             'foundItems' => Item::where('type', 'found')->count(),
@@ -249,6 +256,68 @@ class AdminController extends Controller
         return view('admin.users.create', $this->navCounts());
     }
 
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'student_id' => 'nullable|string|max:255|unique:users,student_id',
+            'role' => ['required', Rule::in(['student', 'admin'])],
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'student_id' => $validated['student_id'] ?? null,
+            'role' => $validated['role'],
+            'password' => Hash::make($validated['password']),
+            'trust_score' => 0,
+        ]);
+
+        return redirect()->route('admin.users')->with('success', 'User created successfully.');
+    }
+
+    public function createFoundItem()
+    {
+        return view('admin.items.create-found', array_merge([
+            'categories' => $this->categories(),
+        ], $this->navCounts()));
+    }
+
+    public function storeFoundItem(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => ['required', 'string', 'max:100', Rule::in(array_keys($this->categories()))],
+            'location' => 'required|string|max:255',
+            'item_date' => 'required|date',
+            'image' => 'required|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('items', 'public');
+        }
+
+        $validated['type'] = 'found';
+        $validated['status'] = 'active';
+        $validated['verification_status'] = 'approved';
+        $validated['verification_reason'] = 'Posted directly by admin.';
+        $validated['user_id'] = Auth::id();
+
+        $item = Item::create($validated);
+
+        /** @var ItemMatcher $matcher */
+        $matcher = app(ItemMatcher::class);
+        $matches = $matcher->findMatches($item);
+        $matcher->saveMatches($item, $matches);
+
+        return redirect()
+            ->route('admin.items')
+            ->with('success', 'Found item created successfully and matching run.');
+    }
+
     public function statistics()
     {
         $totalItems = Item::count();
@@ -275,6 +344,7 @@ class AdminController extends Controller
             'activeMatches' => $activeMatches,
             'returnRate' => $returnRate,
             'categoryBreakdown' => $categoryBreakdown,
+            'categories' => $this->categories(),
         ], $this->navCounts()));
     }
 
@@ -320,6 +390,62 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Item rejected successfully.');
     }
 
+    public function approveClaim(Request $request, Claim $claim): RedirectResponse
+    {
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:1000',
+        ]);
+
+        if ($claim->status !== 'pending') {
+            return redirect()->back()->with('success', 'Claim already processed.');
+        }
+
+        $claim->update([
+            'status' => 'approved',
+            'admin_decision' => 'approved',
+            'admin_notes' => $request->string('admin_notes')->toString() ?: null,
+        ]);
+
+        if ($claim->item) {
+            $claim->item->update(['status' => 'returned']);
+            if ($claim->item->user) {
+                $claim->item->user->increment('trust_score');
+            }
+        }
+
+        if ($claim->user) {
+            $claim->user->increment('trust_score');
+        }
+
+        return redirect()->back()->with('success', 'Claim approved successfully.');
+    }
+
+    public function rejectClaim(Request $request, Claim $claim): RedirectResponse
+    {
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:1000',
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        if ($claim->status !== 'pending') {
+            return redirect()->back()->with('success', 'Claim already processed.');
+        }
+
+        $notes = $request->string('admin_notes')->toString() ?: $request->string('reason')->toString();
+
+        $claim->update([
+            'status' => 'rejected',
+            'admin_decision' => 'rejected',
+            'admin_notes' => $notes !== '' ? $notes : null,
+        ]);
+
+        if ($claim->user) {
+            $claim->user->decrement('trust_score');
+        }
+
+        return redirect()->back()->with('success', 'Claim rejected successfully.');
+    }
+
     private function navCounts(): array
     {
         return [
@@ -327,5 +453,9 @@ class AdminController extends Controller
             'pendingClaimsCount' => Claim::where('status', 'pending')->count(),
         ];
     }
-}
 
+    private function categories(): array
+    {
+        return config('items.categories', []);
+    }
+}
