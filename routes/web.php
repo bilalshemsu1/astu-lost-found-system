@@ -50,11 +50,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/pending-items', [AdminController::class, 'pendingItems'])->name('admin.items.pending');
         Route::patch('/admin/items/{item}/approve', [AdminController::class, 'approveItem'])->name('admin.items.approve');
         Route::patch('/admin/items/{item}/reject', [AdminController::class, 'rejectItem'])->name('admin.items.reject');
+        Route::get('/admin/items/found/create', [AdminController::class, 'createFoundItem'])->name('admin.items.found.create');
+        Route::post('/admin/items/found', [AdminController::class, 'storeFoundItem'])->name('admin.items.found.store');
         Route::get('/admin/items', [AdminController::class, 'items'])->name('admin.items');
         Route::get('/admin/matches', [AdminController::class, 'matches'])->name('admin.matches');
         Route::get('/admin/claims', [AdminController::class, 'claims'])->name('admin.claims');
+        Route::get('/admin/claims/{claim}/review', [AdminController::class, 'reviewClaim'])->name('admin.claims.review');
+        Route::patch('/admin/claims/{claim}/approve', [AdminController::class, 'approveClaim'])->name('admin.claims.approve');
+        Route::patch('/admin/claims/{claim}/reject', [AdminController::class, 'rejectClaim'])->name('admin.claims.reject');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+        Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
         Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
         Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
     });

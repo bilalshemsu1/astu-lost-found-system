@@ -20,7 +20,7 @@
 <!-- Main Content -->
 <div class="lg:ml-64 min-h-screen flex flex-col">
     <!-- Top Bar -->
-    <x-student-header title="Post Lost Items" trustScore="3" />
+    <x-student-header title="Post Lost Items" />
 
     <!-- Page Content -->
     <main class="flex-1 p-4 sm:p-6">
@@ -76,18 +76,9 @@
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
                             <option value="">Select a category</option>
-                            @if (old('category'))
-                                <option value="{{ old('category') }}" selected>{{ old('category') }}</option>
-                            @endif
-                            <option value="electronics">Electronics (Phone, Laptop, Tablet)</option>
-                            <option value="books">Books & Study Materials</option>
-                            <option value="keys">Keys</option>
-                            <option value="cards">ID Cards & Documents</option>
-                            <option value="clothing">Clothing & Accessories</option>
-                            <option value="bags">Bags & Backpacks</option>
-                            <option value="jewelry">Jewelry & Watches</option>
-                            <option value="sports">Sports Equipment</option>
-                            <option value="other">Other</option>
+                            @foreach(($categories ?? []) as $key => $label)
+                                <option value="{{ $key }}" {{ old('category') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
                         </select>
                         @error('category')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -103,10 +94,9 @@
                                 id="description"
                                 name="description"
                                 rows="4"
-                                value="{{ old('description') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
                                 placeholder="Describe your item in detail. Include color, size, brand, distinguishing features, contents, etc."
-                        ></textarea>
+                        >{{ old('description') }}</textarea>
                         <p class="mt-1.5 text-xs text-gray-400">More details increase match accuracy</p>
                         @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -161,7 +151,6 @@
                                     type="file"
                                     id="image"
                                     name="image"
-                                    multiple
                                     accept="image/jpeg,image/png,image/gif"
                                     class="hidden"
                             >

@@ -37,12 +37,12 @@
             <div class="p-4 space-y-3">
                 @forelse($categoryBreakdown ?? [] as $row)
                     @php
-                        $max = max(1, (int) (($categoryBreakdown->max('total') ?? 1));
+                        $max = max(1, (int) ($categoryBreakdown->max('total') ?? 1));
                         $width = (int) round(($row->total / $max) * 100);
                     @endphp
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm text-gray-700">{{ ucfirst($row->category ?: 'Uncategorized') }}</span>
+                            <span class="text-sm text-gray-700">{{ ($categories[$row->category] ?? ucfirst($row->category ?: 'Uncategorized')) }}</span>
                             <span class="text-sm font-medium text-gray-900">{{ $row->total }}</span>
                         </div>
                         <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">

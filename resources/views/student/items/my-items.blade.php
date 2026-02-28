@@ -14,7 +14,7 @@
 <x-student-navigation/>
 
 <div class="lg:ml-64 min-h-screen flex flex-col">
-    <x-student-header title="My Items" trustScore="3" />
+    <x-student-header title="My Items" />
 
     <main class="flex-1 p-4 sm:p-6">
         @if(session('success'))
@@ -56,8 +56,8 @@
                     <option value="">All Statuses</option>
                     <option value="pending_verification" {{ request('status') === 'pending_verification' ? 'selected' : '' }}>Pending Verification</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="claimed" {{ request('status') === 'claimed' ? 'selected' : '' }}>Claimed</option>
-                    <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>Resolved</option>
+                    <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
                 </select>
                 <select name="sort" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
                     <option value="recent" {{ request('sort') !== 'oldest' ? 'selected' : '' }}>Most Recent</option>
@@ -75,8 +75,8 @@
                     $statusClass = match($item->status) {
                         'active' => 'bg-green-50 text-green-700',
                         'pending_verification' => 'bg-amber-50 text-amber-700',
-                        'claimed' => 'bg-blue-50 text-blue-700',
-                        'resolved' => 'bg-gray-100 text-gray-700',
+                        'returned' => 'bg-blue-50 text-blue-700',
+                        'rejected' => 'bg-red-50 text-red-700',
                         default => 'bg-gray-100 text-gray-700',
                     };
                 @endphp

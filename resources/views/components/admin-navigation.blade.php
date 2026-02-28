@@ -65,6 +65,17 @@
         </x-sidebar-link>
 
         <x-sidebar-link
+            href="{{ route('admin.items.found.create') }}"
+            label="Create Found"
+            :active="request()->routeIs('admin.items.found.create')"
+        >
+            <x-slot name="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4v16m8-8H4" />
+            </x-slot>
+        </x-sidebar-link>
+
+        <x-sidebar-link
             href="{{ route('admin.matches') }}"
             label="Matches"
             :active="request()->routeIs('admin.matches')"

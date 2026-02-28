@@ -19,10 +19,14 @@
 <!-- Main Content -->
 <div class="lg:ml-64 min-h-screen flex flex-col">
     <!-- Top Bar -->
-    <x-student-header title="Items Collection" trustScore="3" />
+    <x-student-header title="Items Collection" />
 
     <!-- Page Content -->
     <main class="flex-1 p-4 sm:p-6">
+        @php
+            $categoryLabels = $categories ?? config('items.categories', []);
+        @endphp
+
         @if(session('success'))
             <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
                 {{ session('success') }}
@@ -79,13 +83,9 @@
                         <label class="block text-xs text-gray-500 mb-1">Category</label>
                         <select name="category" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
                             <option value="">All Categories</option>
-                            <option value="electronics" {{ request('category') == 'electronics' ? 'selected' : '' }}>Electronics</option>
-                            <option value="books" {{ request('category') == 'books' ? 'selected' : '' }}>Books</option>
-                            <option value="keys" {{ request('category') == 'keys' ? 'selected' : '' }}>Keys</option>
-                            <option value="cards" {{ request('category') == 'cards' ? 'selected' : '' }}>ID Cards</option>
-                            <option value="clothing" {{ request('category') == 'clothing' ? 'selected' : '' }}>Clothing</option>
-                            <option value="bags" {{ request('category') == 'bags' ? 'selected' : '' }}>Bags</option>
-                            <option value="other" {{ request('category') == 'other' ? 'selected' : '' }}>Other</option>
+                            @foreach($categoryLabels as $key => $label)
+                                <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -145,10 +145,15 @@
                 <div onclick="openItemModal(this)"
                      data-item-id="{{ $item->id }}"
                      data-owner-id="{{ $item->user_id }}"
+                     data-owner-name="{{ $item->user->name ?? '' }}"
+                     data-owner-email="{{ $item->user->email ?? '' }}"
+                     data-owner-phone="{{ $item->user->phone ?? '' }}"
+                     data-owner-telegram="{{ $item->user->telegram_username ?? '' }}"
                      data-requested="{{ $alreadyRequested ? '1' : '0' }}"
                      data-type="{{ $item->type }}"
                      data-title="{{ $item->title }}"
                      data-category="{{ $item->category }}"
+                     data-category-label="{{ $categoryLabels[$item->category] ?? ucfirst($item->category) }}"
                      data-location="{{ $item->location }}"
                      data-date="{{ $item->created_at->diffForHumans() }}"
                      data-description="{{ $item->description ?? '' }}"
@@ -179,7 +184,7 @@
                     <!-- Card Body -->
                     <div class="p-4">
                         <h3 class="font-medium text-gray-900 mb-1">{{ ucfirst($item->title) }}</h3>
-                        <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ ucfirst($item->category) }}</p>
+                        <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ $categoryLabels[$item->category] ?? ucfirst($item->category) }}</p>
                         <div class="flex items-center justify-between text-xs text-gray-400">
                             <span class="flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,6 +418,50 @@
 </div>
 <!-- ========== END OWNERSHIP CLAIM MODAL ========== -->
 
+<!-- ========== CONTACT OWNER MODAL ========== -->
+<div id="contactOwnerModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-900">Contact Lost Item Owner</h2>
+            <button type="button" onclick="closeContactOwnerModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <p class="text-sm text-gray-600">
+                Owner: <span id="contactOwnerName" class="font-medium text-gray-900"></span>
+            </p>
+
+            <div id="contactEmailRow" class="hidden">
+                <p class="text-xs text-gray-500 mb-1">Email</p>
+                <a id="contactEmailLink" href="#" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"></a>
+            </div>
+
+            <div id="contactPhoneRow" class="hidden">
+                <p class="text-xs text-gray-500 mb-1">Phone</p>
+                <a id="contactPhoneLink" href="#" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"></a>
+            </div>
+
+            <div id="contactTelegramRow" class="hidden">
+                <p class="text-xs text-gray-500 mb-1">Telegram</p>
+                <a id="contactTelegramLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"></a>
+            </div>
+
+            <p id="contactFallbackText" class="hidden text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                Direct contact info is not available. Please report the item at the admin office.
+            </p>
+
+            <button type="button" onclick="closeContactOwnerModal()" class="w-full py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+<!-- ========== END CONTACT OWNER MODAL ========== -->
+
 
 <!-- ========== SCRIPTS ========== -->
 <script src="{{ asset('js/index.js') }}"></script>
@@ -440,22 +489,36 @@
     const ownershipClaimModal = document.getElementById('ownershipClaimModal');
     const ownershipItemId = document.getElementById('ownershipItemId');
     const ownershipItemTitle = document.getElementById('ownershipItemTitle');
+    const contactOwnerModal = document.getElementById('contactOwnerModal');
+    const contactOwnerName = document.getElementById('contactOwnerName');
+    const contactEmailRow = document.getElementById('contactEmailRow');
+    const contactEmailLink = document.getElementById('contactEmailLink');
+    const contactPhoneRow = document.getElementById('contactPhoneRow');
+    const contactPhoneLink = document.getElementById('contactPhoneLink');
+    const contactTelegramRow = document.getElementById('contactTelegramRow');
+    const contactTelegramLink = document.getElementById('contactTelegramLink');
+    const contactFallbackText = document.getElementById('contactFallbackText');
     const currentUserId = {{ (int) auth()->id() }};
 
     function openItemModal(element) {
         const itemId = Number(element.dataset.itemId || 0);
         const ownerId = Number(element.dataset.ownerId || 0);
+        const ownerName = element.dataset.ownerName || 'Owner';
+        const ownerEmail = element.dataset.ownerEmail || '';
+        const ownerPhone = element.dataset.ownerPhone || '';
+        const ownerTelegram = element.dataset.ownerTelegram || '';
         const alreadyRequested = element.dataset.requested === '1';
         const type = element.dataset.type;
         const title = element.dataset.title;
         const category = element.dataset.category;
+        const categoryLabel = element.dataset.categoryLabel || '';
         const location = element.dataset.location;
         const date = element.dataset.date;
         const description = element.dataset.description || 'No description provided';
         const image = element.dataset.image;
 
         modalTitle.textContent = title;
-        modalCategory.textContent = capitalizeFirst(category);
+        modalCategory.textContent = categoryLabel || capitalizeFirst(category);
         modalLocation.textContent = location;
         modalDate.textContent = date;
         modalDescription.textContent = description;
@@ -489,6 +552,7 @@
             claimBtn.classList.add('flex');
             contactBtn.classList.add('hidden');
             contactBtn.classList.remove('flex');
+            contactBtn.onclick = null;
             claimBtn.onclick = null;
 
             claimBtn.disabled = false;
@@ -521,6 +585,21 @@
             claimBtn.onclick = null;
             contactBtn.classList.remove('hidden');
             contactBtn.classList.add('flex');
+            contactBtn.disabled = false;
+            contactBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            contactBtn.classList.add('bg-primary-600', 'hover:bg-primary-700');
+            contactBtn.textContent = 'Contact Owner';
+
+            if (ownerId === currentUserId) {
+                contactBtn.disabled = true;
+                contactBtn.textContent = 'You Posted This Item';
+                contactBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                contactBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            } else {
+                contactBtn.onclick = function () {
+                    openContactOwnerModal(ownerName, ownerEmail, ownerPhone, ownerTelegram, title);
+                };
+            }
         }
 
         itemModal.classList.remove('hidden');
@@ -547,6 +626,55 @@
         ownershipClaimModal.classList.remove('flex');
     }
 
+    function openContactOwnerModal(ownerName, ownerEmail, ownerPhone, ownerTelegram, itemTitle) {
+        closeItemModal();
+
+        const safeOwnerName = ownerName || 'Owner';
+        const subject = encodeURIComponent('Found your lost item: ' + itemTitle);
+        const body = encodeURIComponent('Hello ' + safeOwnerName + ', I found an item that may belong to you: ' + itemTitle + '.');
+
+        contactOwnerName.textContent = safeOwnerName;
+
+        if (ownerEmail) {
+            contactEmailLink.textContent = ownerEmail;
+            contactEmailLink.href = 'mailto:' + ownerEmail + '?subject=' + subject + '&body=' + body;
+            contactEmailRow.classList.remove('hidden');
+        } else {
+            contactEmailRow.classList.add('hidden');
+        }
+
+        if (ownerPhone) {
+            const cleanPhone = ownerPhone.replace(/\s+/g, '');
+            contactPhoneLink.textContent = ownerPhone;
+            contactPhoneLink.href = 'tel:' + cleanPhone;
+            contactPhoneRow.classList.remove('hidden');
+        } else {
+            contactPhoneRow.classList.add('hidden');
+        }
+
+        if (ownerTelegram) {
+            const telegramUsername = ownerTelegram.replace(/^@/, '');
+            contactTelegramLink.textContent = '@' + telegramUsername;
+            contactTelegramLink.href = 'https://t.me/' + telegramUsername;
+            contactTelegramRow.classList.remove('hidden');
+        } else {
+            contactTelegramRow.classList.add('hidden');
+        }
+
+        const hasContact = Boolean(ownerEmail || ownerPhone || ownerTelegram);
+        contactFallbackText.classList.toggle('hidden', hasContact);
+
+        contactOwnerModal.classList.remove('hidden');
+        contactOwnerModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeContactOwnerModal() {
+        contactOwnerModal.classList.add('hidden');
+        contactOwnerModal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
     function capitalizeFirst(str) {
         if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -556,11 +684,15 @@
     itemModal.addEventListener('click', (e) => {
         if (e.target === itemModal) closeItemModal();
     });
+    contactOwnerModal.addEventListener('click', (e) => {
+        if (e.target === contactOwnerModal) closeContactOwnerModal();
+    });
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !itemModal.classList.contains('hidden')) closeItemModal();
         if (e.key === 'Escape' && !ownershipClaimModal.classList.contains('hidden')) closeOwnershipClaimModal();
+        if (e.key === 'Escape' && !contactOwnerModal.classList.contains('hidden')) closeContactOwnerModal();
     });
 </script>
 

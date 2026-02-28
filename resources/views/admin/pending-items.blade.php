@@ -16,6 +16,8 @@
     <x-admin-header title="Pending Items" :notificationsCount="$pendingCount + $pendingClaimsCount" />
 
     <main class="flex-1 p-4 sm:p-6">
+        @php($categoryLabels = config('items.categories', []))
+
         @if(session('success'))
             <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
         @endif
@@ -49,7 +51,7 @@
                                 <span class="text-xs text-gray-400">{{ $item->created_at->diffForHumans() }}</span>
                             </div>
                             <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $item->title }}</h3>
-                            <p class="text-xs text-gray-500 mt-1">{{ $item->category }} - {{ $item->location }} - {{ optional($item->item_date)->format('M d, Y') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ ($categoryLabels[$item->category] ?? ucfirst($item->category)) }} - {{ $item->location }} - {{ optional($item->item_date)->format('M d, Y') }}</p>
                             <p class="text-xs text-gray-500 mt-1">Posted by {{ $item->user->name ?? 'Unknown' }} (Trust {{ ($item->user->trust_score ?? 0) >= 0 ? '+' : '' }}{{ $item->user->trust_score ?? 0 }})</p>
                             <p class="text-sm text-gray-600 mt-2">{{ $item->description ? \Illuminate\Support\Str::limit($item->description, 180) : 'No description' }}</p>
                         </div>

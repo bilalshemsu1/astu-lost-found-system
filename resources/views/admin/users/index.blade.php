@@ -16,6 +16,10 @@
     <x-admin-header title="Users" :notificationsCount="$pendingCount + $pendingClaimsCount" />
 
     <main class="flex-1 p-4 sm:p-6">
+        @if(session('success'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
+        @endif
+
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <x-admin-stat-card label="Total Users" :value="$totalUsers ?? 0" />
             <x-admin-stat-card label="Students" :value="$studentUsers ?? 0" valueClass="text-primary-700" />
@@ -62,6 +66,7 @@
                         <td class="px-4 py-3">
                             <p class="font-medium text-gray-900">{{ $user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $user->email }}</p>
+                            <p class="text-xs text-gray-500">{{ $user->phone ?? '-' }}</p>
                             @if($user->student_id)
                                 <p class="text-xs text-gray-400">{{ $user->student_id }}</p>
                             @endif
