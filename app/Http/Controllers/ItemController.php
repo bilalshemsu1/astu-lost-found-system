@@ -211,6 +211,8 @@ class ItemController extends Controller
             'location' => 'required|string|max:255',
             'item_date' => 'required|date',
             'image' => 'nullable|image|max:2048',
+            'share_phone' => 'nullable|boolean',
+            'share_telegram' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
@@ -220,6 +222,9 @@ class ItemController extends Controller
         $validated['type'] = 'lost';
         $validated['status'] = 'pending_verification';
         $validated['user_id'] = Auth::id();
+        $validated['share_phone'] = $request->boolean('share_phone');
+        $validated['share_telegram'] = $request->boolean('share_telegram');
+        $validated['return_location_preference'] = null;
 
         Item::create($validated);
 
@@ -235,7 +240,22 @@ class ItemController extends Controller
             'location' => 'required|string|max:255',
             'item_date' => 'required|date',
             'image' => 'required|image|max:2048',
+            'return_location' => ['required', Rule::in(['admin_office', 'direct'])],
+            'share_phone' => 'nullable|boolean',
+            'share_telegram' => 'nullable|boolean',
         ]);
+
+        if (
+            $validated['return_location'] === 'direct'
+            && !$request->boolean('share_phone')
+            && !$request->boolean('share_telegram')
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'share_phone' => 'For direct handover, enable at least one contact method (phone or Telegram).',
+                ]);
+        }
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -246,6 +266,10 @@ class ItemController extends Controller
         $validated['type'] = 'found';
         $validated['status'] = 'pending_verification';
         $validated['user_id'] = Auth::id();
+        $validated['share_phone'] = $request->boolean('share_phone');
+        $validated['share_telegram'] = $request->boolean('share_telegram');
+        $validated['return_location_preference'] = $validated['return_location'];
+        unset($validated['return_location']);
 
         Item::create($validated);
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Claim;
+use App\Models\ClaimResponse;
 use App\Models\Item;
 use App\Models\SimilarityLog;
 use App\Models\User;
@@ -167,7 +168,7 @@ class AdminController extends Controller
 
     public function claims(Request $request)
     {
-        $query = Claim::with(['item.user', 'user', 'similarityLog']);
+        $query = Claim::with(['item.user', 'user', 'similarityLog', 'claimResponse']);
         $hasSimilarityLogId = Schema::hasColumn('claims', 'similarity_log_id');
 
         if (in_array($request->string('status')->toString(), ['pending', 'approved', 'rejected'], true)) {
@@ -310,6 +311,9 @@ class AdminController extends Controller
         $validated['verification_status'] = 'approved';
         $validated['verification_reason'] = 'Posted directly by admin.';
         $validated['user_id'] = Auth::id();
+        $validated['share_phone'] = false;
+        $validated['share_telegram'] = false;
+        $validated['return_location_preference'] = 'admin_office';
 
         $item = Item::create($validated);
 
@@ -411,16 +415,37 @@ class AdminController extends Controller
             'admin_notes' => $request->string('admin_notes')->toString(),
         ]);
 
-        if ($claim->item) {
-            $claim->item->update(['status' => 'returned']);
-            if ($claim->item->user) {
-                $claim->item->user->increment('trust_score');
-            }
+        $item = $claim->item;
+        $allowsDirectHandover = (bool) (
+            $item &&
+            $item->type === 'found' &&
+            $item->return_location_preference === 'direct' &&
+            ($item->share_phone || $item->share_telegram)
+        );
+
+        ClaimResponse::updateOrCreate(
+            ['claim_id' => $claim->id],
+            [
+                'finder_responded' => true,
+                'finder_shares_contact' => $allowsDirectHandover,
+                'response_at' => now(),
+            ]
+        );
+
+        // Keep item active until handover is confirmed by admin.
+        if ($item && $item->status !== 'returned' && $item->status !== 'rejected') {
+            $item->update(['status' => 'active']);
         }
 
-        if ($claim->user) {
-            $claim->user->increment('trust_score');
-        }
+        // Reject competing pending claims for this same item.
+        Claim::where('item_id', $claim->item_id)
+            ->where('id', '!=', $claim->id)
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'rejected',
+                'admin_decision' => 'rejected',
+                'admin_notes' => 'Another claim for this item was approved after review.',
+            ]);
 
         return redirect()->back()->with('success', 'Claim approved successfully.');
     }
@@ -450,9 +475,48 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Claim rejected successfully.');
     }
 
+    public function confirmClaimHandover(Claim $claim): RedirectResponse
+    {
+        if ($claim->status !== 'approved') {
+            return redirect()->back()->with('success', 'Only approved claims can be confirmed for handover.');
+        }
+
+        $response = ClaimResponse::firstOrCreate(
+            ['claim_id' => $claim->id],
+            [
+                'finder_responded' => true,
+                'finder_shares_contact' => false,
+                'response_at' => now(),
+            ]
+        );
+
+        if ($response->handover_confirmed_at) {
+            return redirect()->back()->with('success', 'Handover was already confirmed.');
+        }
+
+        $response->update([
+            'handover_confirmed_at' => now(),
+            'confirmed_by_admin_id' => Auth::id(),
+        ]);
+
+        if ($claim->item && $claim->item->status !== 'returned') {
+            $claim->item->update(['status' => 'returned']);
+
+            if ($claim->item->user) {
+                $claim->item->user->increment('trust_score');
+            }
+        }
+
+        if ($claim->user) {
+            $claim->user->increment('trust_score');
+        }
+
+        return redirect()->back()->with('success', 'Handover confirmed and item marked as returned.');
+    }
+
     public function reviewClaim(Claim $claim): View
     {
-        $claim->load(['user', 'item.user', 'similarityLog.lostItem.user', 'similarityLog.foundItem.user']);
+        $claim->load(['user', 'item.user', 'similarityLog.lostItem.user', 'similarityLog.foundItem.user', 'claimResponse.confirmedByAdmin']);
         $isDirectRequest = !$claim->similarity_log_id;
 
         return view('admin.claims-review', array_merge([

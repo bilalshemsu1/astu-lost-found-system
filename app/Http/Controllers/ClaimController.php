@@ -35,7 +35,7 @@ class ClaimController extends Controller
         }
 
         $claims = $claimsQuery
-            ->with(['item', 'similarityLog.lostItem', 'similarityLog.foundItem'])
+            ->with(['item.user', 'similarityLog.lostItem', 'similarityLog.foundItem', 'claimResponse'])
             ->latest()
             ->paginate(10);
 

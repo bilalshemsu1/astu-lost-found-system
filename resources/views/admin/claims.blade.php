@@ -66,6 +66,8 @@
                 @forelse($claims as $claim)
                     @php
                         $isDirectRequest = !$claim->similarity_log_id;
+                        $handoverPending = $claim->status === 'approved' && !$claim->claimResponse?->handover_confirmed_at;
+                        $handoverDone = (bool) $claim->claimResponse?->handover_confirmed_at;
                         $scoreLabel = $isDirectRequest
                             ? 'Manual Review'
                             : number_format((float) ($claim->similarity_score ?? 0), 1) . '%';
@@ -75,13 +77,21 @@
                         <td class="px-4 py-3 text-gray-900">{{ $claim->item->title ?? 'Unknown item' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $claim->user->name ?? 'Unknown user' }}</td>
                         <td class="px-4 py-3">
+                            @if($handoverDone)
+                                <span class="text-xs font-medium px-2 py-0.5 rounded bg-green-50 text-green-700">Returned</span>
+                            @elseif($handoverPending)
+                                <span class="text-xs font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-700">Approved - Handover Pending</span>
+                            @else
                                 <span class="text-xs font-medium px-2 py-0.5 rounded {{ $claim->status === 'approved' ? 'bg-green-50 text-green-700' : ($claim->status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700') }}">{{ ucfirst($claim->status) }}</span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-gray-600">{{ $scoreLabel }}</td>
                         <td class="px-4 py-3 text-gray-500">{{ $claim->created_at->format('M d, Y') }}</td>
                         <td class="px-4 py-3">
                             @if($claim->status === 'pending')
                                 <a href="{{ route('admin.claims.review', $claim) }}" class="px-2.5 py-1.5 text-xs font-medium bg-primary-600 text-white rounded hover:bg-primary-700">Review</a>
+                            @elseif($handoverPending)
+                                <a href="{{ route('admin.claims.review', $claim) }}" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700">Manage Handover</a>
                             @else
                                 <span class="text-xs text-gray-400">Processed</span>
                             @endif
@@ -92,6 +102,9 @@
                             Proof: {{ \Illuminate\Support\Str::limit($claim->proof, 180) }}
                             <span class="ml-3">Claimant: {{ $claim->user->phone ?? '-' }}</span>
                             <span class="ml-3">Holder: {{ $claim->item?->user?->phone ?? '-' }}</span>
+                            @if($claim->claimResponse?->handover_confirmed_at)
+                                <span class="ml-3">Handover: {{ $claim->claimResponse->handover_confirmed_at->format('M d, Y H:i') }}</span>
+                            @endif
                             @if($claim->admin_notes)
                                 <span class="ml-3">Admin Notes: {{ \Illuminate\Support\Str::limit($claim->admin_notes, 120) }}</span>
                             @endif

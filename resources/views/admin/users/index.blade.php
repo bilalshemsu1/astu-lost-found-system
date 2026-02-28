@@ -29,7 +29,7 @@
 
         <form method="GET" action="{{ route('admin.users') }}" class="bg-white rounded-xl border border-gray-200 p-4 mb-5">
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name/email/student id..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm lg:col-span-2">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name/email/phone/student id..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm lg:col-span-2">
                 <select name="role" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
                     <option value="">All Roles</option>
                     <option value="student" {{ request('role') === 'student' ? 'selected' : '' }}>Student</option>

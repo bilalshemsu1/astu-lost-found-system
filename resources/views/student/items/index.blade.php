@@ -146,9 +146,10 @@
                      data-item-id="{{ $item->id }}"
                      data-owner-id="{{ $item->user_id }}"
                      data-owner-name="{{ $item->user->name ?? '' }}"
-                     data-owner-email="{{ $item->user->email ?? '' }}"
                      data-owner-phone="{{ $item->user->phone ?? '' }}"
                      data-owner-telegram="{{ $item->user->telegram_username ?? '' }}"
+                     data-owner-share-phone="{{ $item->share_phone ? '1' : '0' }}"
+                     data-owner-share-telegram="{{ $item->share_telegram ? '1' : '0' }}"
                      data-requested="{{ $alreadyRequested ? '1' : '0' }}"
                      data-type="{{ $item->type }}"
                      data-title="{{ $item->title }}"
@@ -435,11 +436,6 @@
                 Owner: <span id="contactOwnerName" class="font-medium text-gray-900"></span>
             </p>
 
-            <div id="contactEmailRow" class="hidden">
-                <p class="text-xs text-gray-500 mb-1">Email</p>
-                <a id="contactEmailLink" href="#" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"></a>
-            </div>
-
             <div id="contactPhoneRow" class="hidden">
                 <p class="text-xs text-gray-500 mb-1">Phone</p>
                 <a id="contactPhoneLink" href="#" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"></a>
@@ -491,8 +487,6 @@
     const ownershipItemTitle = document.getElementById('ownershipItemTitle');
     const contactOwnerModal = document.getElementById('contactOwnerModal');
     const contactOwnerName = document.getElementById('contactOwnerName');
-    const contactEmailRow = document.getElementById('contactEmailRow');
-    const contactEmailLink = document.getElementById('contactEmailLink');
     const contactPhoneRow = document.getElementById('contactPhoneRow');
     const contactPhoneLink = document.getElementById('contactPhoneLink');
     const contactTelegramRow = document.getElementById('contactTelegramRow');
@@ -504,9 +498,10 @@
         const itemId = Number(element.dataset.itemId || 0);
         const ownerId = Number(element.dataset.ownerId || 0);
         const ownerName = element.dataset.ownerName || 'Owner';
-        const ownerEmail = element.dataset.ownerEmail || '';
         const ownerPhone = element.dataset.ownerPhone || '';
         const ownerTelegram = element.dataset.ownerTelegram || '';
+        const ownerSharesPhone = element.dataset.ownerSharePhone === '1';
+        const ownerSharesTelegram = element.dataset.ownerShareTelegram === '1';
         const alreadyRequested = element.dataset.requested === '1';
         const type = element.dataset.type;
         const title = element.dataset.title;
@@ -597,7 +592,7 @@
                 contactBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
             } else {
                 contactBtn.onclick = function () {
-                    openContactOwnerModal(ownerName, ownerEmail, ownerPhone, ownerTelegram, title);
+                    openContactOwnerModal(ownerName, ownerPhone, ownerTelegram, ownerSharesPhone, ownerSharesTelegram);
                 };
             }
         }
@@ -626,24 +621,11 @@
         ownershipClaimModal.classList.remove('flex');
     }
 
-    function openContactOwnerModal(ownerName, ownerEmail, ownerPhone, ownerTelegram, itemTitle) {
+    function openContactOwnerModal(ownerName, ownerPhone, ownerTelegram, ownerSharesPhone, ownerSharesTelegram) {
         closeItemModal();
+        contactOwnerName.textContent = ownerName || 'Owner';
 
-        const safeOwnerName = ownerName || 'Owner';
-        const subject = encodeURIComponent('Found your lost item: ' + itemTitle);
-        const body = encodeURIComponent('Hello ' + safeOwnerName + ', I found an item that may belong to you: ' + itemTitle + '.');
-
-        contactOwnerName.textContent = safeOwnerName;
-
-        if (ownerEmail) {
-            contactEmailLink.textContent = ownerEmail;
-            contactEmailLink.href = 'mailto:' + ownerEmail + '?subject=' + subject + '&body=' + body;
-            contactEmailRow.classList.remove('hidden');
-        } else {
-            contactEmailRow.classList.add('hidden');
-        }
-
-        if (ownerPhone) {
+        if (ownerSharesPhone && ownerPhone) {
             const cleanPhone = ownerPhone.replace(/\s+/g, '');
             contactPhoneLink.textContent = ownerPhone;
             contactPhoneLink.href = 'tel:' + cleanPhone;
@@ -652,7 +634,7 @@
             contactPhoneRow.classList.add('hidden');
         }
 
-        if (ownerTelegram) {
+        if (ownerSharesTelegram && ownerTelegram) {
             const telegramUsername = ownerTelegram.replace(/^@/, '');
             contactTelegramLink.textContent = '@' + telegramUsername;
             contactTelegramLink.href = 'https://t.me/' + telegramUsername;
@@ -661,7 +643,7 @@
             contactTelegramRow.classList.add('hidden');
         }
 
-        const hasContact = Boolean(ownerEmail || ownerPhone || ownerTelegram);
+        const hasContact = Boolean((ownerSharesPhone && ownerPhone) || (ownerSharesTelegram && ownerTelegram));
         contactFallbackText.classList.toggle('hidden', hasContact);
 
         contactOwnerModal.classList.remove('hidden');

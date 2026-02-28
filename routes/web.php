@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/claims/{claim}/review', [AdminController::class, 'reviewClaim'])->name('admin.claims.review');
         Route::patch('/admin/claims/{claim}/approve', [AdminController::class, 'approveClaim'])->name('admin.claims.approve');
         Route::patch('/admin/claims/{claim}/reject', [AdminController::class, 'rejectClaim'])->name('admin.claims.reject');
+        Route::patch('/admin/claims/{claim}/handover-confirm', [AdminController::class, 'confirmClaimHandover'])->name('admin.claims.handover.confirm');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
         Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');

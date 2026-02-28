@@ -99,6 +99,10 @@
                             : 'bg-blue-50 text-blue-700';
                         $displayTitle = $claim->item?->title ?? 'Item unavailable';
                         $displayLocation = $claim->item?->location ?? '-';
+                        $handoverConfirmed = (bool) $claim->claimResponse?->handover_confirmed_at;
+                        $handoverPending = $claim->status === 'approved' && !$handoverConfirmed;
+                        $canSeeFinderPhone = (bool) ($claim->claimResponse?->finder_shares_contact && $claim->item?->share_phone);
+                        $canSeeFinderTelegram = (bool) ($claim->claimResponse?->finder_shares_contact && $claim->item?->share_telegram);
                     @endphp
                     <div class="bg-white rounded-xl border border-gray-200 p-4">
                         <div class="flex items-center justify-between gap-2">
@@ -138,6 +142,30 @@
                             <p><span class="font-medium text-gray-700">Proof:</span> {{ $claim->proof }}</p>
                             @if($claim->admin_notes)
                                 <p><span class="font-medium text-gray-700">Admin Notes:</span> {{ $claim->admin_notes }}</p>
+                            @endif
+
+                            @if($handoverPending)
+                                <div class="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                    <p><span class="font-medium text-blue-800">Handover Status:</span> Approved, waiting for item transfer confirmation.</p>
+                                    @if($claim->claimResponse?->finder_shares_contact)
+                                        <p class="mt-1"><span class="font-medium text-blue-800">Transfer Method:</span> Direct contact with finder.</p>
+                                        @if($canSeeFinderPhone)
+                                            <p class="mt-1"><span class="font-medium text-blue-800">Finder Phone:</span> {{ $claim->item?->user?->phone ?? '-' }}</p>
+                                        @endif
+                                        @if($canSeeFinderTelegram)
+                                            <p class="mt-1"><span class="font-medium text-blue-800">Finder Telegram:</span> {{ $claim->item?->user?->telegram_username ? '@' . ltrim($claim->item->user->telegram_username, '@') : '-' }}</p>
+                                        @endif
+                                        @if(!$canSeeFinderPhone && !$canSeeFinderTelegram)
+                                            <p class="mt-1">Finder approved direct handover but no shareable contact details are available.</p>
+                                        @endif
+                                    @else
+                                        <p class="mt-1"><span class="font-medium text-blue-800">Transfer Method:</span> Collect at admin office.</p>
+                                    @endif
+                                </div>
+                            @elseif($handoverConfirmed)
+                                <div class="mt-2 rounded-lg border border-green-200 bg-green-50 p-3">
+                                    <p><span class="font-medium text-green-800">Handover Status:</span> Completed on {{ $claim->claimResponse->handover_confirmed_at->format('M d, Y H:i') }}.</p>
+                                </div>
                             @endif
                         </div>
                     </div>

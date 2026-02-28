@@ -15,6 +15,9 @@ class Item extends Model
         'verification_status',
         'verification_reason',
         'status',
+        'share_phone',
+        'share_telegram',
+        'return_location_preference',
         'image_path',
         'location',
         'item_date',
@@ -23,6 +26,8 @@ class Item extends Model
 
     protected $casts = [
         'item_date' => 'date',
+        'share_phone' => 'boolean',
+        'share_telegram' => 'boolean',
     ];
 
     // Relationship to User

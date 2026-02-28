@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Claim extends Model
 {
@@ -37,5 +38,10 @@ class Claim extends Model
     public function similarityLog(): BelongsTo
     {
         return $this->belongsTo(SimilarityLog::class);
+    }
+
+    public function claimResponse(): HasOne
+    {
+        return $this->hasOne(ClaimResponse::class);
     }
 }

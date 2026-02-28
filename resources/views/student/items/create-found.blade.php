@@ -179,11 +179,11 @@
                         <p class="text-sm font-medium text-gray-700 mb-3">Where should the owner collect the item?</p>
                         <div class="space-y-2">
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="radio" name="return_location" value="admin_office" checked class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500">
+                                <input type="radio" name="return_location" value="admin_office" {{ old('return_location', 'admin_office') === 'admin_office' ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500">
                                 <span class="text-sm text-gray-600">Admin Office (Recommended)</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="radio" name="return_location" value="direct" class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500">
+                                <input type="radio" name="return_location" value="direct" {{ old('return_location') === 'direct' ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500">
                                 <span class="text-sm text-gray-600">I can meet directly with the owner</span>
                             </label>
                         </div>
@@ -194,14 +194,17 @@
                         <p class="text-sm font-medium text-gray-700 mb-3">Contact Preference</p>
                         <div class="space-y-2">
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="share_phone" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                                <input type="checkbox" name="share_phone" value="1" {{ old('share_phone') ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                                 <span class="text-sm text-gray-600">Share my phone number with verified owners</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="share_telegram" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                                <input type="checkbox" name="share_telegram" value="1" {{ old('share_telegram') ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                                 <span class="text-sm text-gray-600">Share my Telegram username</span>
                             </label>
                         </div>
+                        @error('share_phone')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Submit Buttons -->
