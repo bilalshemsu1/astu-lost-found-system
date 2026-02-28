@@ -209,7 +209,7 @@ class ItemController extends Controller
             'description' => 'required|string',
             'category' => ['required', 'string', 'max:100', Rule::in(array_keys($this->categories()))],
             'location' => 'required|string|max:255',
-            'item_date' => 'required|date',
+            'item_date' => 'required|date|before_or_equal:today',
             'image' => 'nullable|image|max:2048',
             'share_phone' => 'nullable|boolean',
             'share_telegram' => 'nullable|boolean',

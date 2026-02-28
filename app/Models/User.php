@@ -22,7 +22,6 @@ class User extends Authenticatable
         'telegram_verified_at',
         'role',
         'trust_score',
-        'is_anonymous',
     ];
 
     protected $hidden = [
@@ -33,7 +32,6 @@ class User extends Authenticatable
     protected $casts = [
         'telegram_verified_at' => 'datetime',
         'trust_score' => 'integer',
-        'is_anonymous' => 'boolean',
     ];
 
     public function items(): HasMany

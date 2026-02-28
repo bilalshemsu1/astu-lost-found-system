@@ -66,25 +66,3 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
     });
 });
-
-// Test route for matching
-Route::get('/test-match', function (\App\Services\ItemMatcher $matcher) {
-    // Get one lost item to tes
-    $lost = \App\Models\Item::where('type', 'lost')->first();
-
-    if (!$lost) {
-        return 'Need at least one lost item!';
-    }
-
-    // Test matching
-    $matches = $matcher->findMatches($lost);
-    $topMatch = $matches[0]['candidate']->title ?? null;
-
-    return [
-        'lost_item' => $lost->title,
-        'top_match_item' => $topMatch,
-        'matches_found' => count($matches),
-        'matches' => $matches
-    ];
-
-});
