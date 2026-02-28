@@ -238,7 +238,7 @@ class ItemController extends Controller
             'description' => 'nullable|string',
             'category' => ['required', 'string', 'max:100', Rule::in(array_keys($this->categories()))],
             'location' => 'required|string|max:255',
-            'item_date' => 'required|date',
+            'item_date' => 'required|date|before_or_equal:today',
             'image' => 'required|image|max:2048',
             'return_location' => ['required', Rule::in(['admin_office', 'direct'])],
             'share_phone' => 'nullable|boolean',
