@@ -11,11 +11,10 @@ use App\Http\Controllers\Student\ClaimsController as StudentClaimsController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\ItemsController as StudentItemsController;
 use App\Http\Controllers\Student\MatchesController as StudentMatchesController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [HomeController::class, 'index']);
 
 //auth routes
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');

@@ -116,19 +116,19 @@
             <!-- Stats Cards -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div class="text-3xl font-bold text-gray-900 mb-1">100</div>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($itemsRecovered) }}</div>
                     <div class="text-sm text-gray-500">Items Recovered</div>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div class="text-3xl font-bold text-primary-600 mb-1">89%</div>
+                    <div class="text-3xl font-bold text-primary-600 mb-1">{{ $matchSuccessRate }}%</div>
                     <div class="text-sm text-gray-500">Match Success Rate</div>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div class="text-3xl font-bold text-gray-900 mb-1">1+</div>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($activeStudents) }}</div>
                     <div class="text-sm text-gray-500">Active Students</div>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div class="text-3xl font-bold text-gray-900 mb-1">&lt;24h</div>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ $avgResponseTimeLabel }}</div>
                     <div class="text-sm text-gray-500">Avg. Response Time</div>
                 </div>
             </div>
@@ -274,92 +274,48 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Recent Activity</h2>
                 <p class="text-gray-600">Latest found items waiting for their owners</p>
             </div>
-            <a href="/register" class="text-primary-600 hover:text-primary-700 text-sm font-medium mt-4 sm:mt-0">
-                View all items →
+            <a href="{{ route('student.items') }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium mt-4 sm:mt-0">
+                View all items &rarr;
             </a>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Item 1 -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-primary-200 transition-colors">
-                <div class="aspect-video bg-gray-100 flex items-center justify-center">
-                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div class="p-4">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Found</span>
-                        <span class="text-xs text-gray-400">2 hours ago</span>
+            @forelse($recentFoundItems as $item)
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-primary-200 transition-colors">
+                    <div class="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+                        @if($item->image_path)
+                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}" class="h-full w-full object-cover">
+                        @else
+                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        @endif
                     </div>
-                    <h3 class="font-semibold text-gray-900 mb-1">iPhone 15 Pro</h3>
-                    <p class="text-sm text-gray-500 mb-3">Found at Library 3rd floor.</p>
-                    <div class="flex items-center text-xs text-gray-400 gap-3">
+                    <div class="p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Found</span>
+                            <span class="text-xs text-gray-400">{{ $item->created_at->diffForHumans() }}</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-1">{{ $item->title }}</h3>
+                        <p class="text-sm text-gray-500 mb-3">{{ \Illuminate\Support\Str::limit($item->description ?: ('Found at ' . $item->location . '.'), 90) }}</p>
+                        <div class="flex items-center text-xs text-gray-400 gap-3">
                             <span class="flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                Library
+                                {{ $item->location }}
                             </span>
-                        <span>Electronics</span>
+                            <span>{{ $item->category_label }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-primary-200 transition-colors">
-                <div class="aspect-video bg-gray-100 flex items-center justify-center">
-                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
+            @empty
+                <div class="sm:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-gray-300 p-8 text-center">
+                    <p class="text-sm text-gray-500">No active found items yet.</p>
+                    <a href="/register" class="inline-flex mt-3 text-sm font-medium text-primary-600 hover:text-primary-700">Post the first found item</a>
                 </div>
-                <div class="p-4">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Found</span>
-                        <span class="text-xs text-gray-400">5 hours ago</span>
-                    </div>
-                    <h3 class="font-semibold text-gray-900 mb-1">Scientific Calculator</h3>
-                    <p class="text-sm text-gray-500 mb-3">Found in Engineering Block.</p>
-                    <div class="flex items-center text-xs text-gray-400 gap-3">
-                            <span class="flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Eng. Block
-                            </span>
-                        <span>Electronics</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-primary-200 transition-colors">
-                <div class="aspect-video bg-gray-100 flex items-center justify-center">
-                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                    </svg>
-                </div>
-                <div class="p-4">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Found</span>
-                        <span class="text-xs text-gray-400">Yesterday</span>
-                    </div>
-                    <h3 class="font-semibold text-gray-900 mb-1">Set of Keys</h3>
-                    <p class="text-sm text-gray-500 mb-3">ound near the main cafeteria entrance.</p>
-                    <div class="flex items-center text-xs text-gray-400 gap-3">
-                            <span class="flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Cafeteria
-                            </span>
-                        <span>Keys</span>
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -385,7 +341,7 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-4">
     <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-400">
-        © {{ date('Y') }} ASTU Lost & Found. All rights reserved.
+        &copy; {{ date('Y') }} ASTU Lost & Found. All rights reserved.
     </div>
 </footer>
 
