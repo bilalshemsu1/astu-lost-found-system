@@ -5,58 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Matches - ASTU Lost & Found</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-link.active {
-            background-color: #f0fdfa;
-            color: #0d9488;
-            border-left: 2px solid #0d9488;
-        }
-        @media (max-width: 1023px) {
-            .sidebar-link.active {
-                border-left: none;
-                border-left: 2px solid #0d9488;
-            }
-        }
-        .sidebar-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            transition: opacity 0.3s ease;
-        }
-        .sidebar-panel {
-            transition: transform 0.3s ease;
-        }
-        .sidebar-panel.closed {
-            transform: translateX(-100%);
-        }
-        @media (min-width: 1024px) {
-            .sidebar-panel.closed {
-                transform: translateX(0);
-            }
-        }
-    </style>
+    <script src="{{ asset('js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
 
@@ -72,8 +23,8 @@
     <x-student-header title="Match Items" trustScore="3" />
 
     <!-- Page Content -->
-    <main class="flex-1 p-4 sm:p-6">
-        <!-- Info Banner -->
+<main class="flex-1 p-4 sm:p-6">
+    <!-- Info Banner -->
         <div class="bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6">
             <div class="flex gap-3">
                 <div class="w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -90,47 +41,64 @@
 
         <!-- Matches List -->
         <div class="space-y-4">
-            <!-- Match Card 1 - High Match -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Strong Candidate</span>
-                    </div>
-                    <span class="text-xs text-gray-400">Candidate found 2 hours ago</span>
-                </div>
+            @forelse($matches as $match)
+                @php
+                    $lostItem = $match->lostItem;
+                    $foundItem = $match->foundItem;
+                    $isMyItemLost = $lostItem->user_id === auth()->id();
+                @endphp
 
-                <div class="p-4">
-                    <div class="grid md:grid-cols-2 gap-4 mb-4">
-                        <!-- Your Lost Item -->
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs font-medium text-gray-500 uppercase mb-2">Your Lost Item</p>
-                            <div class="flex gap-3">
-                                <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-gray-900 text-sm">iPhone 15 Pro Max</h3>
-                                    <p class="text-xs text-gray-500 mt-0.5">Black case with student ID inside</p>
-                                    <p class="text-xs text-gray-400 mt-1">Library • Feb 20, 2026</p>
+                <!-- Match Card -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-medium {{ $match->similarity_percentage >= 80 ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700' }} px-2 py-0.5 rounded">
+                                {{ $match->similarity_percentage >= 80 ? 'Strong Candidate' : 'Potential Match' }}
+                            </span>
+                        </div>
+                        <span class="text-xs text-gray-400">Candidate found {{ $match->created_at->diffForHumans() }}</span>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <!-- Your Lost Item -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-xs font-medium text-gray-500 uppercase mb-2">{{ $isMyItemLost ? 'Your Lost Item' : 'Your Found Item' }}</p>
+                                <div class="flex gap-3">
+                                    @if($lostItem->image_path)
+                                        <img src="{{ asset('storage/' . $lostItem->image_path) }}" class="w-14 h-14 object-cover rounded-lg flex-shrink-0">
+                                    @else
+                                        <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <h3 class="font-medium text-gray-900 text-sm">{{ $lostItem->title }}</h3>
+                                        <p class="text-xs text-gray-500 mt-0.5">{{ $lostItem->description ? \Illuminate\Support\Str::limit($lostItem->description, 40) : 'No description' }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $lostItem->location }} • {{ \Carbon\Carbon::parse($lostItem->item_date)->format('M d, Y') }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Found Item -->
-                        <div class="bg-green-50 rounded-lg p-4">
-                            <p class="text-xs font-medium text-green-600 uppercase mb-2">Found Item</p>
+                            <!-- Found Item -->
+                            <div class="bg-green-50 rounded-lg p-4">
+                            <p class="text-xs font-medium text-green-600 uppercase mb-2">{{ $isMyItemLost ? 'Found Item' : 'Lost Item' }}</p>
                             <div class="flex gap-3">
-                                <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
+                                @if($foundItem->image_path)
+                                    <img src="{{ asset('storage/' . $foundItem->image_path) }}" class="w-14 h-14 object-cover rounded-lg flex-shrink-0">
+                                @else
+                                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
                                 <div>
-                                    <h3 class="font-medium text-gray-900 text-sm">iPhone 15 Pro Max</h3>
-                                    <p class="text-xs text-gray-500 mt-0.5">Black case, found near entrance</p>
-                                    <p class="text-xs text-gray-400 mt-1">Cafeteria • Feb 21, 2026</p>
+                                    <h3 class="font-medium text-gray-900 text-sm">{{ $foundItem->title }}</h3>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ $foundItem->description ? \Illuminate\Support\Str::limit($foundItem->description, 40) : 'No description' }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">{{ $foundItem->location }} • {{ \Carbon\Carbon::parse($foundItem->item_date)->format('M d, Y') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -147,9 +115,9 @@
                     </div>
                 </div>
             </div>
-
+        @empty
             <!-- Empty State -->
-            <div class="hidden bg-white rounded-xl border border-gray-200 p-8 text-center">
+            <div class="bg-white rounded-xl border border-gray-200 p-8 text-center">
                 <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -157,16 +125,16 @@
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">No Matches Yet</h3>
                 <p class="text-sm text-gray-500 mb-4">When we find items matching your lost reports, they'll appear here.</p>
-                <a href="student-post-lost.html" class="inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700">
-                    Report a Lost Item
+                <a href="{{ route('student.items') }}" class="inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700">
+                    Browse Items
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
             </div>
-        </div>
-    </main>
-</div>
+        @endforelse
+    </div>
+</main>
 
 <!-- Claim Modal -->
 <div id="claimModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">

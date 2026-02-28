@@ -588,28 +588,32 @@ class ItemMatcher
      */
     public function saveMatches(Item $item, array $matches): void
     {
-        $lostItem = $item->type === 'lost' ? $item : null;
-        $foundItem = $item->type === 'found' ? $item : null;
-
         foreach ($matches as $match) {
             $candidate = $match['candidate'];
             $scores = $match['scores'];
 
-            // Determine which is lost/found
-            $lostId = $lostItem ? $lostItem->id : $candidate->id;
-            $foundId = $foundItem ? $foundItem->id : $candidate->id;
+            $lostItem = $item->type === 'lost' ? $item : $candidate;
+            $foundItem = $item->type === 'found' ? $item : $candidate;
 
-            SimilarityLog::create([
-                'lost_item_id' => $lostId,
-                'found_item_id' => $foundId,
-                'similarity_percentage' => $scores['total'],
-                'title_match' => $scores['title'],
-                'category_match' => $scores['category'],
-                'description_match' => $scores['description'],
-                'location_match' => $scores['location'],
-                'date_match' => $scores['date'],
-                'notified' => false,
-            ]);
+            if (($lostItem->type ?? null) !== 'lost' || ($foundItem->type ?? null) !== 'found') {
+                continue;
+            }
+
+            SimilarityLog::updateOrCreate(
+                [
+                    'lost_item_id' => $lostItem->id,
+                    'found_item_id' => $foundItem->id,
+                ],
+                [
+                    'similarity_percentage' => $scores['total'],
+                    'title_match' => $scores['title'],
+                    'category_match' => $scores['category'],
+                    'description_match' => $scores['description'],
+                    'location_match' => $scores['location'],
+                    'date_match' => $scores['date'],
+                    'notified' => false,
+                ]
+            );
         }
     }
 }

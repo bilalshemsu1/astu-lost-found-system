@@ -28,9 +28,8 @@ Route::middleware(['auth'])->group(function (){
         return view('student.claim');
     })->name('student.claims.show');
     
-    Route::get('/matches', function () {
-        return view('student.matches');
-    })->name('student.matches');
+    Route::get('/matches', [ItemController::class, 'matches'])->name('student.matches');
+
 
     // items routes
     Route::prefix('/items')->group(function () {
@@ -54,7 +53,7 @@ Route::middleware(['auth'])->group(function (){
 
 // Test route for matching
 Route::get('/test-match', function (\App\Services\ItemMatcher $matcher) {
-    // Get one lost item to test
+    // Get one lost item to tes
     $lost = \App\Models\Item::where('type', 'lost')->first();
     
     if (!$lost) {
