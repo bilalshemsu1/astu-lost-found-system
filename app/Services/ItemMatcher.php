@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Mail\SimilarityMatchFoundMail;
 use App\Models\Item;
 use App\Models\SimilarityLog;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ItemMatcher
 {
@@ -599,21 +602,84 @@ class ItemMatcher
                 continue;
             }
 
-            SimilarityLog::updateOrCreate(
-                [
-                    'lost_item_id' => $lostItem->id,
-                    'found_item_id' => $foundItem->id,
-                ],
-                [
-                    'similarity_percentage' => $scores['total'],
-                    'title_match' => $scores['title'],
-                    'category_match' => $scores['category'],
-                    'description_match' => $scores['description'],
-                    'location_match' => $scores['location'],
-                    'date_match' => $scores['date'],
-                    'notified' => false,
-                ]
-            );
+            $similarityLog = SimilarityLog::firstOrNew([
+                'lost_item_id' => $lostItem->id,
+                'found_item_id' => $foundItem->id,
+            ]);
+
+            $isNew = !$similarityLog->exists;
+
+            $similarityLog->fill([
+                'similarity_percentage' => $scores['total'],
+                'title_match' => $scores['title'],
+                'category_match' => $scores['category'],
+                'description_match' => $scores['description'],
+                'location_match' => $scores['location'],
+                'date_match' => $scores['date'],
+            ]);
+
+            // Preserve existing notification state; only defaults to false for new matches.
+            if ($isNew) {
+                $similarityLog->notified = false;
+            }
+
+            $similarityLog->save();
+
+            if (!$similarityLog->notified && $this->sendSimilarityMatchNotification($similarityLog)) {
+                $similarityLog->forceFill(['notified' => true])->save();
+            }
         }
+    }
+
+    private function sendSimilarityMatchNotification(SimilarityLog $similarityLog): bool
+    {
+        $similarityLog->loadMissing(['lostItem.user', 'foundItem.user']);
+
+        $lostItem = $similarityLog->lostItem;
+        $foundItem = $similarityLog->foundItem;
+        $lostOwner = $lostItem?->user;
+        $foundOwner = $foundItem?->user;
+
+        $recipients = collect([$lostOwner, $foundOwner])
+            ->filter(fn ($user) => $user && filter_var((string) $user->email, FILTER_VALIDATE_EMAIL))
+            ->unique('email')
+            ->values();
+
+        if ($recipients->isEmpty()) {
+            return true;
+        }
+
+        $allQueued = true;
+
+        foreach ($recipients as $recipient) {
+            $role = ((int) $recipient->id === (int) $lostOwner?->id) ? 'lost_owner' : 'found_owner';
+            $myItemTitle = $role === 'lost_owner'
+                ? ($lostItem?->title ?? 'Your lost item')
+                : ($foundItem?->title ?? 'Your found item');
+            $otherItemTitle = $role === 'lost_owner'
+                ? ($foundItem?->title ?? 'Matched found item')
+                : ($lostItem?->title ?? 'Matched lost item');
+
+            $payload = [
+                'receiver_name' => $recipient->name,
+                'my_item_title' => $myItemTitle,
+                'other_item_title' => $otherItemTitle,
+                'similarity_percentage' => number_format((float) $similarityLog->similarity_percentage, 1),
+                'matches_url' => route('student.matches'),
+            ];
+
+            try {
+                Mail::to($recipient->email)->queue(new SimilarityMatchFoundMail($payload));
+            } catch (\Throwable $exception) {
+                $allQueued = false;
+                Log::warning('Failed to queue similarity match email.', [
+                    'similarity_log_id' => $similarityLog->id,
+                    'recipient_email' => $recipient->email,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return $allQueued;
     }
 }
