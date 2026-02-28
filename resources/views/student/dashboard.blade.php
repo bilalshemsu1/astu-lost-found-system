@@ -96,6 +96,90 @@
                     </div>
                 </div>
                 <div class="divide-y divide-gray-100">
+                    <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                                    <span class="text-xs font-medium bg-red-50 text-red-700 px-2 py-0.5 rounded">Lost</span>
+                                    <span class="text-xs font-medium bg-amber-50 text-amber-700 px-2 py-0.5 rounded">Has Match</span>
+                                </div>
+                                <h3 class="font-medium text-gray-900 text-sm sm:text-base mb-1">iPhone 15 Pro Max</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 line-clamp-2">Black case with student ID inside. Lost at Library 3rd floor.</p>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-400">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            </svg>
+                                            Library
+                                        </span>
+                                    <span>Feb 20</span>
+                                    <span class="text-amber-600 font-medium">Candidate ready</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                                    <span class="text-xs font-medium bg-red-50 text-red-700 px-2 py-0.5 rounded">Lost</span>
+                                    <span class="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Active</span>
+                                </div>
+                                <h3 class="font-medium text-gray-900 text-sm sm:text-base mb-1">Chemistry Textbook</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 line-clamp-2">4th edition, has my name on first page. Lost in Engineering Block.</p>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-400">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            </svg>
+                                            Eng. Block
+                                        </span>
+                                    <span>Feb 18</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                                    <span class="text-xs font-medium bg-green-50 text-green-700 px-2 py-0.5 rounded">Found</span>
+                                    <span class="text-xs font-medium bg-primary-50 text-primary-700 px-2 py-0.5 rounded">Claimed</span>
+                                </div>
+                                <h3 class="font-medium text-gray-900 text-sm sm:text-base mb-1">Set of Keys</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 line-clamp-2">3 keys on a blue keychain. Found near cafeteria entrance.</p>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-400">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            </svg>
+                                            Cafeteria
+                                        </span>
+                                    <span>Feb 21</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     
                 </div>
             </div>
@@ -175,7 +259,31 @@
                 <h2 class="font-semibold text-gray-900 text-sm sm:text-base">Potential Matches for Your Items</h2>
             </div>
             <div class="p-3 sm:p-4 grid sm:grid-cols-2 gap-3 sm:gap-4">
-                
+                <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-medium bg-primary-50 text-primary-700 px-2 py-0.5 rounded">Strong Candidate</span>
+                        <span class="text-xs text-gray-400">Found 2h ago</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-900 text-sm sm:text-base mb-1">iPhone 15 Pro Max</h4>
+                            <p class="text-xs sm:text-sm text-gray-500 mb-3">Black case. Found at Cafeteria.</p>
+                            <div class="flex gap-2">
+                                <button class="flex-1 py-2 text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 rounded transition-colors">
+                                    Yes, It's Mine!
+                                </button>
+                                <button class="flex-1 py-2 text-xs font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
+                                    Not Mine
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

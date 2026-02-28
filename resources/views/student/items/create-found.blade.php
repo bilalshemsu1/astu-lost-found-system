@@ -47,7 +47,15 @@
                     <p class="text-sm text-gray-500 mt-1">Please provide accurate details to help the owner identify their item</p>
                 </div>
 
-                <form id="foundItemForm" class="p-4 sm:p-6 space-y-5">
+                <form id="foundItemForm" class="p-4 sm:p-6 space-y-5"  method="POST" action="{{route('student.found.post')}}" enctype="multipart/form-data" novalidate>
+                    @if(session('success'))
+                        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+
+                    @csrf
                     <!-- Title -->
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -58,9 +66,13 @@
                                 id="title"
                                 name="title"
                                 required
+                                value="{{ old('title') }}" 
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                 placeholder="e.g., iPhone 15, Student ID Card, Keys"
                         >
+                        @error('title')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Category -->
@@ -75,6 +87,9 @@
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
                             <option value="">Select a category</option>
+                            @if (old('category'))
+                                <option value="{{ old('category') }}" selected>{{ old('category') }}</option>
+                            @endif
                             <option value="electronics">Electronics (Phone, Laptop, Tablet)</option>
                             <option value="books">Books & Study Materials</option>
                             <option value="keys">Keys</option>
@@ -85,6 +100,9 @@
                             <option value="sports">Sports Equipment</option>
                             <option value="other">Other</option>
                         </select>
+                        @error('category')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Description -->
@@ -96,9 +114,13 @@
                                 id="description"
                                 name="description"
                                 rows="4"
+                                value="{{ old('description') }}" 
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
                                 placeholder="Describe the item. Include color, condition, any identifying features or contents."
                         ></textarea>
+                        @error('description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Location -->
@@ -111,9 +133,13 @@
                                 id="location"
                                 name="location"
                                 required
+                                value="{{ old('location') }}" 
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                 placeholder="e.g., Library 3rd floor, Cafeteria table 5, Bus stop"
                         >
+                        @error('location')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Date -->
@@ -126,8 +152,12 @@
                                 id="item_date"
                                 name="item_date"
                                 required
+                                value="{{ old('item_date') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
+                        @error('item_date')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Image Upload - REQUIRED for found items -->
@@ -163,6 +193,9 @@
                             </div>
                         </div>
                         <p id="imageError" class="mt-1.5 text-xs text-red-500 hidden">Please upload a photo of the found item</p>
+                        @error('image')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Where to Return -->
@@ -197,9 +230,6 @@
 
                     <!-- Submit Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                        <a href="student-dashboard.html" class="flex-1 py-2.5 px-4 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-center">
-                            Cancel
-                        </a>
                         <button
                                 type="submit"
                                 id="submitBtn"

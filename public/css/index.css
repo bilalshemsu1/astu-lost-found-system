@@ -48,8 +48,8 @@ body {
 
 /* Blur effect for images */
 .blur-image {
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+    filter: blur(0.5px);
+    -webkit-filter: blur(0.5px);
 }
 
 /* Tab button active state */

@@ -26,7 +26,7 @@
     <main class="flex-1 p-4 sm:p-6">
         <div class="max-w-2xl mx-auto">
             <!-- Info Card -->
-            {{-- <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                 <div class="flex gap-3">
                     <div class="w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
                         <p class="text-xs sm:text-sm text-amber-700 mt-1">After submission, an admin will verify your report. Once verified, our system will automatically search for matches.</p>
                     </div>
                 </div>
-            </div> --}}
+            </div>
 
             <!-- Form Card -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -48,6 +48,12 @@
                 </div>
 
                 <form class="p-4 sm:p-6 space-y-5" method="POST" action="{{route('student.lost.post')}}" enctype="multipart/form-data" novalidate>
+
+                    @if(session('success'))
+                        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
                     @csrf
                     <!-- Title -->
@@ -60,10 +66,15 @@
                                 id="title"
                                 name="title"
                                 required
+                                value="{{ old('title') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                 placeholder="e.g., iPhone 15 Pro Max, Black Backpack"
                         >
+
                         <p class="mt-1.5 text-xs text-gray-400">A clear, specific name for your item</p>
+                        @error('title')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Category -->
@@ -78,6 +89,9 @@
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
                             <option value="">Select a category</option>
+                            @if (old('category'))
+                                <option value="{{ old('category') }}" selected>{{ old('category') }}</option>
+                            @endif
                             <option value="electronics">Electronics (Phone, Laptop, Tablet)</option>
                             <option value="books">Books & Study Materials</option>
                             <option value="keys">Keys</option>
@@ -88,6 +102,9 @@
                             <option value="sports">Sports Equipment</option>
                             <option value="other">Other</option>
                         </select>
+                        @error('category')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Description -->
@@ -99,10 +116,14 @@
                                 id="description"
                                 name="description"
                                 rows="4"
+                                value="{{ old('description') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
                                 placeholder="Describe your item in detail. Include color, size, brand, distinguishing features, contents, etc."
                         ></textarea>
                         <p class="mt-1.5 text-xs text-gray-400">More details increase match accuracy</p>
+                        @error('description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Location -->
@@ -115,9 +136,13 @@
                                 id="location"
                                 name="location"
                                 required
+                                value="{{ old('location') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                 placeholder="e.g., Library 3rd floor, Cafeteria, Engineering Block B"
                         >
+                        @error('location')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Date -->
@@ -130,9 +155,13 @@
                                 id="item_date"
                                 name="item_date"
                                 required
+                                value="{{ old('item_date') }}"
                                 class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                         >
                         <p class="mt-1.5 text-xs text-gray-400">When did you last have the item?</p>
+                        @error('item_date')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Image Upload -->
@@ -164,6 +193,9 @@
                                     </svg>
                                 </button>
                             </div>
+                            @error('image')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
