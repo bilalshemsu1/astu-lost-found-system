@@ -4,29 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - ASTU Lost & Found</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <x-common-head-scripts />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
@@ -138,6 +116,25 @@
                     @enderror
                 </div>
 
+                <!-- Telegram Username -->
+                <div>
+                    <label for="telegram_username" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Telegram Username <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <input
+                            type="text"
+                            id="telegram_username"
+                            name="telegram_username"
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                            placeholder="e.g., @your_username"
+                            value="{{ old('telegram_username') }}"
+                    >
+                    <p class="mt-1.5 text-xs text-gray-400">Used only when direct contact is required for handover.</p>
+                    @error('telegram_username')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -191,7 +188,7 @@
                         Confirm Password
                     </label>
                     <input type="password" id="password_confirmation" name="password_confirmation" 
-                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg..." 
+                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors" 
                         placeholder="Confirm your password" required>
                     @error('password_confirmation')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -216,7 +213,7 @@
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-4">
     <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-400">
-        © {{ date('Y') }} ASTU Lost & Found. All rights reserved.
+        &copy; {{ date('Y') }} ASTU Lost & Found. All rights reserved.
     </div>
 </footer>
 
