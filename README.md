@@ -2,13 +2,13 @@
 
 <p align="center">
   <a href="#">
-    <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+    <img src="https://img.shields.io/badge/PHP-8.5+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
   </a>
   <a href="#">
-    <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+    <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
   </a>
   <a href="#">
-    <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+    <img src="https://img.shields.io/badge/SQLite-07414E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
   </a>
   <a href="#">
     <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
@@ -26,7 +26,7 @@
 
 ---
 
-> 🔍 **A smart lost & found platform for ASTU students.** Report lost items, claim found items, and let our AI-powered matching algorithm help you find what you're looking for.
+> 🔍 **A smart lost & found platform for ASTU students.** Report lost items, claim found items, and let our Text Similarity Engine (Jaccard + Cosine Similarity + TF-IDF + Edit Distance + N-grams) matching algorithm help you find what you're looking for.
 
 ---
 
@@ -54,14 +54,12 @@
 ### ⚡ Core Features
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Similarity_Matching-FF6B6B?style=flat-square" alt="AI Matching">
-  <img src="https://img.shields.io/badge/Telegram_Integration-26A5E4?style=flat-square" alt="Telegram">
+  <img src="https://img.shields.io/badge/Similarity_Matching-FF6B6B?style=flat-square" alt="Simialrity Matching">
   <img src="https://img.shields.io/badge/Email_Notifications-10B981?style=flat-square" alt="Email">
   <img src="https://img.shields.io/badge/RBAC-8B5CF6?style=flat-square" alt="RBAC">
 </p>
 
-- 🤖 **AI Similarity Matching** — Algorithm finds potential matches based on title, description, category, location, and date
-- 📱 **Telegram Bot** — Instant notifications when matches are found
+- 🤖 **Similarity Matching** — Algorithm finds potential matches based on title, description, category, location, and date
 - 📧 **Email Notifications** — Stay updated via email alerts
 - 🔐 **Role-Based Access** — Separate student and admin interfaces
 
@@ -71,23 +69,22 @@
 
 ```mermaid
 graph LR
-    A[Laravel 11] --> B[PHP 8.2+]
-    A --> C[MySQL 8.0]
+    A[Laravel 12] --> B[PHP 8.5+]
+    A --> C[SQLite]
     A --> D[Blade Templates]
     D --> E[Tailwind CSS]
     A --> F[Session Auth]
-    F --> G[Telegram API]
-    F --> H[Mail]
+    F --> G[Mail]
 ```
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | Laravel 11 (PHP 8.2+) |
-| **Database** | MySQL 8.0 |
+| **Backend** | Laravel 12 (PHP 8.5+) |
+| **Database** | SQLite |
 | **Frontend** | Blade Templates + Tailwind CSS |
 | **Authentication** | Session-based (Laravel Built-in) |
 | **Testing** | PHPUnit / Pest |
-| **Notifications** | Telegram Bot API + Mailtrap |
+| **Notifications** | Mailtrap |
 
 ---
 
@@ -103,7 +100,7 @@ graph LR
 │ 🔐 password      │     │ 🏷️ category      │     │ 📊 similarity    │
 │ 🎭 role          │◄────│ 📍 location      │     │ 📝 proof         │
 │ ⭐ trust_score   │     │ 📅 item_date     │     │ ✅ status        │
-│ 📱 telegram_*    │     │ 🔄 type          │     └────────┬─────────┘
+│                  │     │   🔄 type         │     └────────┬─────────┘
 └──────────────────┘     │ 🟢 status        │              │
                          │ 🖼️ image_path    │      ┌───────┴───────┐
                          │ 👤 user_id       │      │ claim_responses│
@@ -130,7 +127,7 @@ graph LR
 
 - ✅ PHP 8.2 or higher
 - ✅ Composer
-- ✅ MySQL 8.0+
+- ✅ MySQL 8.0+ or SQLite
 - ✅ Node.js & npm
 - ✅ Git
 
@@ -179,9 +176,6 @@ DB_PORT=3306
 DB_DATABASE=astu_lost_found
 DB_USERNAME=root
 DB_PASSWORD=your_password
-
-# Optional: Telegram Bot
-TELEGRAM_BOT_TOKEN=your_bot_token
 
 # Optional: Mail
 MAIL_MAILER=smtp
@@ -338,19 +332,6 @@ php artisan test --coverage
 | GET | `/admin/users` | Manage users | ✅ Admin |
 | GET | `/admin/items` | Verify items | ✅ Admin |
 
----
-
-## 🤖 Telegram Bot Setup
-
-1. **Create a bot** via [@BotFather](https://t.me/BotFather)
-2. **Get the bot token**
-3. **Add to `.env`:**
-   ```
-   TELEGRAM_BOT_TOKEN=your_token_here
-   ```
-4. **Run migrations** to create user telegram fields
-
----
 
 ## 🌍 Deployment
 
