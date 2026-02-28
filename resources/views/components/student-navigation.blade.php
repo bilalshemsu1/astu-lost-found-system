@@ -62,6 +62,17 @@
             </x-slot>
         </x-sidebar-link>
 
+        <x-sidebar-link
+            href="{{ route('student.my-items') }}"
+            label="My Items"
+            :active="request()->routeIs('student.my-items')"
+        >
+            <x-slot name="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5.121 17.804A8.969 8.969 0 0112 15c2.49 0 4.745 1.01 6.379 2.643M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </x-slot>
+        </x-sidebar-link>
+
         <x-sidebar-link 
             href="{{ route('student.matches') }}" 
             label="My Matches"
@@ -77,9 +88,9 @@
         </x-sidebar-link>
 
         <x-sidebar-link 
-            href="{{ route('student.claims.show') }}" 
+            href="{{ route('student.claims') }}" 
             label="My Claims"
-            :active="request()->routeIs('student.claims.show')"
+            :active="request()->routeIs('student.claims')"
         >
             <x-slot name="icon">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 

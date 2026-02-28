@@ -25,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
                         $query->whereIn('lost_item_id', $userItemIds)
                               ->orWhereIn('found_item_id', $userItemIds);
                     })
+                    ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    })
                     ->where('notified', false)
                     ->count();
             }

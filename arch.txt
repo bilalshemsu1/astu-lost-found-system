@@ -1,0 +1,541 @@
+# ASTU Digital Lost & Found System
+# Complete Project Specification
+
+================================================================================
+                           TABLE OF CONTENTS
+================================================================================
+
+1. System Overview
+2. User Registration & Login Flow
+3. Post Lost Item Flow
+4. Post Found Item Flow
+5. Admin Verification Flow (Both Lost & Found)
+6. Similarity Matching Engine
+7. Admin Dashboard - Similarity View
+8. Notification System
+9. Owner Response & Claim Flow
+10. Admin Claim Review
+11. After Admin Decision
+12. Claim Rejected / No Match Flow
+13. Statistics Dashboard
+14. Complete Database Schema
+15. Security Requirements
+16. Trust Score System
+17. User Roles & Permissions
+
+================================================================================
+                           1. SYSTEM OVERVIEW
+================================================================================
+
+The ASTU Digital Lost & Found System is a comprehensive platform designed to
+help students at ASTU (Addis Ababa Science and Technology University) report,
+search, and recover lost personal belongings.
+
+CORE FEATURES:
+- User Authentication (Student/Admin)
+- Report Lost Items
+- Report Found Items
+- Automatic Similarity Matching (80%+ threshold)
+- Admin Verification (Both Lost & Found)
+- Claim Management
+- Trust Score System
+- Multiple Notification Channels
+- Dashboard Statistics
+
+USER ROLES:
+- Student: Can post items, search, claim, respond
+- Admin: Can verify items, approve/reject claims, view stats
+
+================================================================================
+                    2. USER REGISTRATION & LOGIN FLOW
+================================================================================
+
+REGISTRATION:
+┌─────────────────────────────────────────────────────────────┐
+│ User fills: Name, Email, Password, Confirm Password      │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Validation:                                                │
+│ • Email: unique, valid format                            │
+│ • Password: min 8 chars                                  │
+│ • Name: required, min 2 chars                            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Password hashed with bcrypt (Laravel Hash::make)         │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ User created: role = "student", trust_score = 0       │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Login with email + password                                │
+│ JWT Token or Session created                              │
+└─────────────────────────────────────────────────────────────┘
+
+================================================================================
+                         3. POST LOST ITEM FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────┐
+│ User fills:                                                │
+│ • Title (required): "Lost iPhone 15"                     │
+│ • Category (required): Electronics → Phone               │
+│ • Description (optional): "Black case, scratch on back"  │
+│ • Location (required): "Library 3rd floor"             │
+│ • Date (required): 2025-02-20                          │
+│ • Image (optional): Upload photo                         │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Validation:                                                │
+│ • Required fields filled                                  │
+│ • Image: jpg,png,gif, max 2MB                            │
+│ • Date: not in future                                     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Save to Database:                                          │
+│ • type: "lost"                                           │
+│ • verification_status: "pending"                          │
+│ • status: "pending_verification"                         │
+│ • user_id: current_user                                  │
+│ • similarity_score: null                                  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Redirect to: "Item submitted! Waiting for verification"   │
+└─────────────────────────────────────────────────────────────┘
+
+================================================================================
+                        4. POST FOUND ITEM FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────┐
+│ User fills:                                                │
+│ • Title (required): "Found iPhone 15"                    │
+│ • Category (required): Electronics → Phone               │
+│ • Description (optional): "Black with cracked screen"   │
+│ • Location (required): "Cafeteria table 5"              │
+│ • Date (required): 2025-02-21                            │
+│ • Image (required): Upload photo                         │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Validation:                                                │
+│ • Required fields filled                                  │
+│ • Image: REQUIRED for found items                         │
+│ • Image: jpg,png,gif, max 2MB                            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Save to Database:                                          │
+│ • type: "found"                                           │
+│ • verification_status: "pending"                          │
+│ • status: "pending_verification"                         │
+│ • user_id: current_user (finder)                       │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Redirect to: "Item submitted! Waiting for verification"   │
+└─────────────────────────────────────────────────────────────┘
+
+================================================================================
+                   5. ADMIN VERIFICATION FLOW (BOTH)
+================================================================================
+
+IMPORTANT: BOTH Lost AND Found items require Admin verification!
+
+WHY VERIFY LOST ITEMS?
+- Prevent fake lost items (stalking risk)
+- Prevent false claims
+
+WHY VERIFY FOUND ITEMS?
+- Ensure items actually exist
+- Prevent fake found items (prank posts)
+
+┌─────────────────────────────────────────────────────────────┐
+│ Admin reviews each item:                                  │
+│                                                          │
+│ Checkpoints:                                             │
+│ • Is the item description reasonable?                    │
+│ • Is the location valid?                                 │
+│ • Any suspicious patterns?                               │
+│ • For found items: does image look genuine?              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                   ┌──────┴──────┐
+                   ▼             ▼
+            ┌──────────┐   ┌──────────┐
+            │ APPROVE  │   │ REJECT   │
+            └──────┬───┘   └──────┬───┘
+                   │              │
+                   ▼              ▼
+          ┌────────────┐   ┌────────────┐
+          │ status:    │   │ status:   │
+          │ "active"   │   │"rejected" │
+          │            │   │           │
+          │ similarity │   │ rejection_│
+          │ engine    │   │ reason    │
+          │ starts    │   │ saved    │
+          └──────┬────┘   └──────┬────┘
+                 │               │
+                 ▼               ▼
+          ┌────────────┐   ┌────────────┐
+          │ User       │   │ User gets │
+          │ notified:  │   │ warning + │
+          │ "Your item│   │ trust -1  │
+          │ is verified"│  │ score -1  │
+          └────────────┘   └────────────┘
+
+================================================================================
+                    6. SIMILARITY MATCHING ENGINE
+================================================================================
+
+TRIGGER: When new item is verified (lost or found)
+
+COMPARISON LOGIC:
+- If new item is LOST: Compare with ALL "found" items
+- If new item is FOUND: Compare with ALL "lost" items
+
+SIMILARITY CALCULATION:
+
+┌─────────────────┬──────────┬───────────────────────┐
+│ Factor          │ Weight   │ How Calculated        │
+├─────────────────┼──────────┼───────────────────────┤
+│ Title           │  30%    │ Levenshtein distance │
+│ Similarity      │          │ or word match        │
+├─────────────────┼──────────┼───────────────────────┤
+│ Category        │  30%    │ Exact = 100%         │
+│ Match           │          │ Partial = 50%        │
+├─────────────────┼──────────┼───────────────────────┤
+│ Description     │  20%    │ Word overlap ratio   │
+│ Similarity      │          │                      │
+├─────────────────┼──────────┼───────────────────────┤
+│ Location        │  10%    │ Same building = 100% │
+│ Proximity       │          │ Same campus = 50%    │
+├─────────────────┼──────────┼───────────────────────┤
+│ Date            │  10%    │ Same day = 100%      │
+│ Proximity       │          │ ±3 days = 70%        │
+└─────────────────┴──────────┴───────────────────────┘
+
+FORMULA:
+TOTAL = (Title × 0.3) + (Category × 0.3) + (Description × 0.2) + 
+        (Location × 0.1) + (Date × 0.1)
+
+THRESHOLD: If TOTAL ≥ 80% → MATCH!
+
+FOR EACH MATCH:
+- Save similarity_log
+- Mark item as "has_match"
+- Send notification to LOST item owner
+
+================================================================================
+                7. ADMIN DASHBOARD - SIMILARITY VIEW
+================================================================================
+
+TABS: [Pending Items] [Active Items] [All Matches]
+
+VIEW SHOWS:
+- Lost items with their matched found items
+- Similarity percentage for each pair
+- Breakdown by category
+
+SIMILARITY BREAKDOWN DISPLAY:
+┌───────────────────────────────────────────────────┐
+│ Title Match:     ████████████░░░░░░  90%        │
+│ Category Match:  ██████████████░░░░░  95%        │
+│ Location Match:  ████████░░░░░░░░░░░  50%        │
+│ Date Match:      ██████████████░░░░░  85%        │
+│ ───────────────────────────────────────────      │
+│ TOTAL:         ████████████████████░░  85%     │
+└───────────────────────────────────────────────────┘
+
+ADMIN CAN:
+- View all similarity matches
+- Manually override matches
+- See confidence score breakdown
+- Request more info from users
+- Force-match or force-unmatch
+
+================================================================================
+                        8. NOTIFICATION SYSTEM
+================================================================================
+
+NOTIFICATION TYPES:
+1. Item Verified: "Your [lost/found] item has been verified!"
+2. Match Found: "We found a similar item matching your lost item!"
+3. Claim Status: "Your claim has been approved/rejected"
+4. Response Needed: "Finder needs to respond to claim"
+
+MATCH NOTIFICATION (80%+ similarity):
+┌───────────────────────────────────────────────────┐
+│ 🔔 MATCH FOUND!                                  │
+│                                                   │
+│ We found a similar item that matches your        │
+│ lost item!                                       │
+│                                                   │
+│ ┌─────────────────────────────────────────┐     │
+│ │  [IMAGE]                                │     │
+│ │                                         │     │
+│ │  Found: iPhone 15                      │     │
+│ │  Location: Campus Cafeteria             │     │
+│ │  Date: Feb 21, 2025                    │     │
+│ │  Category: Electronics                  │     │
+│ │  Similarity: 85%                        │     │
+│ │  ──────────────────────────────────────│     │
+│ │  [YES, IT'S MINE!]  [NO, NOT MINE]    │     │
+│ └─────────────────────────────────────────┘     │
+└───────────────────────────────────────────────────┘
+
+================================================================================
+                    9. OWNER RESPONSE & CLAIM FLOW
+================================================================================
+
+IF OWNER RESPONDS "YES, IT'S MINE!":
+
+1. Owner fills claim form:
+   • Proof of ownership (description, receipt, etc)
+   • Additional notes
+
+2. Save claim:
+   • item_id: matched found item
+   • user_id: owner
+   • similarity_score: (from match)
+   • status: "pending"
+   • proof: [owner's submission]
+
+3. Notify:
+   • Admin: "New claim submitted"
+   • Finder: "Owner has claimed your item"
+
+IF OWNER RESPONDS "NO, NOT MINE":
+- Item stays "available"
+- System continues searching
+- Other owners can also get notification
+
+================================================================================
+                        10. ADMIN CLAIM REVIEW
+================================================================================
+
+ADMIN SEES:
+- Claim details with proof
+- Similarity score
+- Owner's trust score
+- Finder's response (if any)
+
+ADMIN DECISION:
+┌─────────────┐         ┌─────────────┐
+│  APPROVE    │         │  REJECT    │
+└─────────────┘         └─────────────┘
+     │                       │
+     ▼                       ▼
+Notify BOTH            Notify Owner
+Finder chooses         Show similar
+share contact?         items
+
+================================================================================
+                    11. AFTER ADMIN DECISION
+================================================================================
+
+IF APPROVED:
+
+FINDER NOTIFICATION:
+┌───────────────────────────────────────────────────┐
+│ "Your found item claim approved!"              │
+│                                                 │
+│ Do you want to share contact?                  │
+│ [YES]    [NO]                                  │
+└───────────────────────────────────────────────────┘
+
+IF FINDER SAYS YES:
+- Both get contact info (phone, telegram)
+- Can arrange meeting
+
+IF FINDER SAYS NO:
+- Both told: "Meet at Admin Office"
+- No direct contact exchanged
+
+IF REJECTED:
+- Owner notified with reason
+- Similar items suggested
+
+================================================================================
+                  12. CLAIM REJECTED / NO MATCH FLOW
+================================================================================
+
+NOTIFY OWNER:
+┌───────────────────────────────────────────────────┐
+│ "Your claim was rejected."                       │
+│                                                 │
+│ Reason: [Not enough proof / Not matching]       │
+│                                                 │
+│ ────────────────────────────────────────────   │
+│ SIMILAR ITEMS YOU MIGHT CLAIM:                  │
+│ [IMG] Item A (65% match) → [View] [Claim]      │
+│ [IMG] Item B (45% match) → [View] [Claim]      │
+└───────────────────────────────────────────────────┘
+
+================================================================================
+                      13. STATISTICS DASHBOARD
+================================================================================
+
+TOTALS:
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│    LOST      │ │    FOUND     │ │  RETURNED    │
+│     45       │ │     38       │ │     28       │
+└──────────────┘ └──────────────┘ └──────────────┘
+
+CHARTS:
+• Items by Category (Pie Chart)
+• Items by Day/Week (Line Chart)
+• Return Rate by Month (Bar Chart)
+• Top Categories (Bar Chart)
+
+RECENT ACTIVITY:
+• Feb 25: John claimed iPhone (Approved)
+• Feb 24: Mary posted Found Calculator
+• Feb 23: System matched iPhone → 85%
+
+================================================================================
+                      14. COMPLETE DATABASE SCHEMA
+================================================================================
+
+USERS
+─────────────
+id | name | email | password | role | trust_score | is_anonymous | created_at | updated_at
+
+ITEMS
+─────────────
+id | title | description | category | type | verification_status | 
+verification_reason | status | image_path | location | item_date | 
+user_id | created_at | updated_at
+
+SIMILARITY_LOGS
+───────────────
+id | lost_item_id | found_item_id | similarity_percentage |
+title_match | category_match | description_match | location_match | 
+date_match | notified | created_at
+
+CLAIMS
+─────────────
+id | item_id | user_id | similarity_score | proof | status |
+admin_decision | admin_notes | created_at | updated_at
+
+CLAIM_RESPONSES
+────────────────
+id | claim_id | finder_responded | finder_shares_contact | response_at
+
+NOTIFICATIONS
+───────────────
+id | user_id | type | title | message | read | item_id | created_at
+
+REPORTS
+─────────────
+id | reporter_id | item_id | reason | status | created_at
+
+USER_TRUST_HISTORY
+──────────────────
+id | user_id | action | points_change | reason | created_at
+
+================================================================================
+                      15. SECURITY REQUIREMENTS
+================================================================================
+
+1. SECURE FILE UPLOAD
+   • Rename files (timestamp_random.extension)
+   • Validate MIME type (not just extension)
+   • Store outside web root or use storage
+   • Limit file size (max 2MB)
+
+2. ROLE-BASED ACCESS CONTROL
+   • Middleware: 'auth' for all routes
+   • Middleware: 'admin' for admin routes
+   • Check: if (auth()->user()->role === 'admin')
+
+3. SQL INJECTION PREVENTION
+   • Use Eloquent ORM (automatic escaping)
+   • Use parameterized queries
+   • Input validation
+
+4. PASSWORD SECURITY
+   • Hash with bcrypt (Laravel Hash::make)
+   • Never store plain text
+
+5. INPUT VALIDATION
+   • Laravel Form Requests
+   • Required fields
+   • Max lengths
+   • Email format
+   • File type validation
+
+6. PROTECT USER DATA
+   • Auth check before showing user data
+   • {{ auth()->id() === $item->user_id }}
+   • No direct user info in URLs
+
+7. PREVENT FALSE CLAIMS
+   • Trust score system
+   • Similarity matching before claim
+   • Admin verification
+   • Claim limits
+
+================================================================================
+                        16. TRUST SCORE SYSTEM
+================================================================================
+
+START: Everyone starts at 0
+
+GOOD ACTIONS (+ points):
+• +1 for verified lost item posted
+• +1 for item returned to owner
+• +1 for verified found item posted
+
+BAD ACTIONS (- points):
+• -1 for rejected item (fake/spam)
+• -3 for false claim
+• -3 for reported behavior
+• -5 for multiple false claims
+
+TRUST LEVELS:
+• Score above +5: "Trusted User" - Fast approval
+• Score 0 to +5: "Normal User" - Normal process
+• Score below 0: "Warning" - Extra verification
+• Score below -10: "Blocked" - Cannot post items
+
+================================================================================
+                    17. USER ROLES & PERMISSIONS
+================================================================================
+
+STUDENT (default):
+✓ Register and Login
+✓ Post Lost Item (requires admin verification)
+✓ Post Found Item (requires admin verification)
+✓ Search Items
+✓ Claim Found Items (after similarity match)
+✓ Respond to claims on their items
+✓ Choose to share contact info or not
+✓ View own items and claims
+✓ Report suspicious items
+
+ADMIN:
+✓ All student features
+✓ Verify pending items (approve/reject)
+✓ Review and approve/reject claims
+✓ View all system statistics
+✓ Force-match or force-unmatch items
+✓ Manage users and trust scores
+✓ Access all items and claims
+✓ Generate reports

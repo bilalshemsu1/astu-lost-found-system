@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SimilarityLog extends Model
 {
@@ -41,5 +42,9 @@ class SimilarityLog extends Model
     {
         return $this->belongsTo(Item::class, 'found_item_id');
     }
-    
+
+    public function dismissedMatches(): HasMany
+    {
+        return $this->hasMany(DismissedMatch::class);
+    }
 }

@@ -25,21 +25,7 @@
     <!-- Page Content -->
     <main class="flex-1 p-4 sm:p-6">
         <div class="max-w-2xl mx-auto">
-            <!-- Info Card -->
-            <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-green-900">Thank you for helping!</p>
-                        <p class="text-xs sm:text-sm text-green-700 mt-1">Your submission will be verified by an admin. Once approved, potential owners will be notified automatically.</p>
-                    </div>
-                </div>
-            </div>
-
+            
             <!-- Form Card -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div class="p-4 sm:p-6 border-b border-gray-200">

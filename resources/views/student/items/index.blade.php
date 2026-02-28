@@ -23,6 +23,17 @@
 
     <!-- Page Content -->
     <main class="flex-1 p-4 sm:p-6">
+        @if(session('success'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {{ $errors->first() }}
+            </div>
+        @endif
 
         <!-- ========== FILTER FORM ========== -->
         <form action="{{ route('student.items') }}" method="GET" id="filterForm">
@@ -127,7 +138,14 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
             @forelse($items as $item)
+                @php
+                    $alreadyRequested = isset($claimedItemIds) && $claimedItemIds->contains($item->id);
+                    $isFoundNotOwner = $item->type === 'found' && (int) $item->user_id !== (int) auth()->id();
+                @endphp
                 <div onclick="openItemModal(this)"
+                     data-item-id="{{ $item->id }}"
+                     data-owner-id="{{ $item->user_id }}"
+                     data-requested="{{ $alreadyRequested ? '1' : '0' }}"
                      data-type="{{ $item->type }}"
                      data-title="{{ $item->title }}"
                      data-category="{{ $item->category }}"
@@ -144,11 +162,17 @@
                         </span>
 
                         @if($item->image_path)
-                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}" class="h-full w-full object-cover">
+                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}" class="h-full w-full object-cover {{ $isFoundNotOwner ? 'blur-sm scale-105' : '' }}">
                         @else
                             <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
+                        @endif
+
+                        @if($isFoundNotOwner)
+                            <span class="absolute bottom-2 right-2 z-10 text-[11px] font-medium bg-black/60 text-white px-2 py-0.5 rounded">
+                                Blurred
+                            </span>
                         @endif
                     </div>
 
@@ -301,8 +325,8 @@
                     </div>
                 </div>
 
-                <!-- Description (hidden for found items) -->
-                <div id="modalDescriptionContainer" class="flex items-start gap-3 hidden">
+                <!-- Description -->
+                <div id="modalDescriptionContainer" class="flex items-start gap-3">
                     <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -321,7 +345,7 @@
                     <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
-                    <p class="text-xs text-amber-700">For security, detailed descriptions and clear images are only shared after your claim is approved.</p>
+                    <p class="text-xs text-amber-700">Found-item images are blurred for non-owners until ownership is verified.</p>
                 </div>
             </div>
 
@@ -341,6 +365,53 @@
     </div>
 </div>
 <!-- ========== END MODAL ========== -->
+
+<!-- ========== OWNERSHIP CLAIM MODAL ========== -->
+<div id="ownershipClaimModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <h2 class="font-semibold text-gray-900">Request Item Ownership</h2>
+            <button type="button" onclick="closeOwnershipClaimModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('student.claims.store') }}" class="p-4 space-y-4">
+            @csrf
+            <input type="hidden" name="item_id" id="ownershipItemId">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p class="text-xs text-amber-700">
+                    Submit proof that this found item is yours. Admin will review and decide.
+                </p>
+            </div>
+            <p class="text-sm text-gray-600">
+                Selected item: <span id="ownershipItemTitle" class="font-medium text-gray-900"></span>
+            </p>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                    Proof of Ownership <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                    name="proof"
+                    required
+                    rows="4"
+                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-sm"
+                    placeholder="Describe unique details only the real owner knows (marks, lock screen, contents, serial clues, etc.)"
+                ></textarea>
+            </div>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="closeOwnershipClaimModal()" class="flex-1 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors text-sm">
+                    Submit Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- ========== END OWNERSHIP CLAIM MODAL ========== -->
 
 
 <!-- ========== SCRIPTS ========== -->
@@ -366,8 +437,15 @@
     const securityNotice = document.getElementById('securityNotice');
     const claimBtn = document.getElementById('claimBtn');
     const contactBtn = document.getElementById('contactBtn');
+    const ownershipClaimModal = document.getElementById('ownershipClaimModal');
+    const ownershipItemId = document.getElementById('ownershipItemId');
+    const ownershipItemTitle = document.getElementById('ownershipItemTitle');
+    const currentUserId = {{ (int) auth()->id() }};
 
     function openItemModal(element) {
+        const itemId = Number(element.dataset.itemId || 0);
+        const ownerId = Number(element.dataset.ownerId || 0);
+        const alreadyRequested = element.dataset.requested === '1';
         const type = element.dataset.type;
         const title = element.dataset.title;
         const category = element.dataset.category;
@@ -381,9 +459,11 @@
         modalLocation.textContent = location;
         modalDate.textContent = date;
         modalDescription.textContent = description;
+        modalDescriptionContainer.classList.remove('hidden');
 
         // Image handling
-        if (image && image.trim() !== '') {
+        const hasImage = image && image.trim() !== '';
+        if (hasImage) {
             modalImg.src = '/storage/' + image;
             modalImg.classList.remove('hidden');
             modalPlaceholder.classList.add('hidden');
@@ -391,26 +471,54 @@
             modalImg.classList.add('hidden');
             modalPlaceholder.classList.remove('hidden');
         }
+        modalImg.classList.remove('blur-sm', 'scale-105');
 
         // Found vs Lost display
-        if (type.toLowerCase() === 'found') {
+        const isFoundItem = type.toLowerCase() === 'found';
+        const isFoundNotOwner = isFoundItem && ownerId !== currentUserId;
+
+        if (isFoundItem) {
             modalBadge.textContent = 'Found';
             modalBadge.className = 'absolute top-3 left-3 text-xs font-medium bg-green-500 text-white px-2 py-1 rounded';
-            blurOverlay.classList.remove('hidden');
-            securityNotice.classList.remove('hidden');
-            modalDescriptionContainer.classList.add('hidden');
+            blurOverlay.classList.toggle('hidden', !isFoundNotOwner || !hasImage);
+            securityNotice.classList.toggle('hidden', !isFoundNotOwner);
+            if (isFoundNotOwner && hasImage) {
+                modalImg.classList.add('blur-sm', 'scale-105');
+            }
             claimBtn.classList.remove('hidden');
             claimBtn.classList.add('flex');
             contactBtn.classList.add('hidden');
             contactBtn.classList.remove('flex');
+            claimBtn.onclick = null;
+
+            claimBtn.disabled = false;
+            claimBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            claimBtn.classList.add('bg-primary-600', 'hover:bg-primary-700');
+            claimBtn.textContent = 'Request Ownership';
+
+            if (ownerId === currentUserId) {
+                claimBtn.disabled = true;
+                claimBtn.textContent = 'You Posted This Item';
+                claimBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                claimBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            } else if (alreadyRequested) {
+                claimBtn.disabled = true;
+                claimBtn.textContent = 'Request Already Sent';
+                claimBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                claimBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            } else {
+                claimBtn.onclick = function () {
+                    openOwnershipClaimModal(itemId, title);
+                };
+            }
         } else {
             modalBadge.textContent = 'Lost';
             modalBadge.className = 'absolute top-3 left-3 text-xs font-medium bg-red-500 text-white px-2 py-1 rounded';
             blurOverlay.classList.add('hidden');
             securityNotice.classList.add('hidden');
-            modalDescriptionContainer.classList.remove('hidden');
             claimBtn.classList.add('hidden');
             claimBtn.classList.remove('flex');
+            claimBtn.onclick = null;
             contactBtn.classList.remove('hidden');
             contactBtn.classList.add('flex');
         }
@@ -426,6 +534,19 @@
         document.body.style.overflow = '';
     }
 
+    function openOwnershipClaimModal(itemId, itemTitle) {
+        closeItemModal();
+        ownershipItemId.value = itemId;
+        ownershipItemTitle.textContent = itemTitle;
+        ownershipClaimModal.classList.remove('hidden');
+        ownershipClaimModal.classList.add('flex');
+    }
+
+    function closeOwnershipClaimModal() {
+        ownershipClaimModal.classList.add('hidden');
+        ownershipClaimModal.classList.remove('flex');
+    }
+
     function capitalizeFirst(str) {
         if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -439,6 +560,7 @@
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !itemModal.classList.contains('hidden')) closeItemModal();
+        if (e.key === 'Escape' && !ownershipClaimModal.classList.contains('hidden')) closeOwnershipClaimModal();
     });
 </script>
 
