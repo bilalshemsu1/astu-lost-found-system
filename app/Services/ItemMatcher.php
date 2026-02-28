@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 
 class ItemMatcher
 {
-    private int $threshold = 44;
+    private int $threshold = 70;
     
     private array $stopWords = [
         'a', 'an', 'the', 'is', 'are', 'was', 'were', 'of', 'to', 'for', 'and', 'or',

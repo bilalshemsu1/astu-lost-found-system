@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
 
+use App\Http\Controllers\Controller;
 use App\Models\Claim;
 use App\Models\Item;
 use App\Models\SimilarityLog;
@@ -10,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
-class ClaimController extends Controller
+class ClaimsController extends Controller
 {
     public function index(Request $request)
     {
@@ -90,7 +91,6 @@ class ClaimController extends Controller
             abort(403, 'You are not allowed to claim this match.');
         }
 
-        // Only the lost-item owner should claim the found item.
         $isLostOwner = $userItemIds->contains($similarityLog->lost_item_id);
         if (!$isLostOwner) {
             return back()->withErrors([

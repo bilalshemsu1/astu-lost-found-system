@@ -1,102 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
 
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Student\Concerns\HasStudentItemCategories;
 use App\Models\Claim;
-use App\Models\DismissedMatch;
 use App\Models\Item;
-use App\Models\SimilarityLog;
-use App\Services\ItemMatcher;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
-class ItemController extends Controller
+class ItemsController extends Controller
 {
-    public function dashboard()
-    {
-        $userId = Auth::id();
-        $userItemsQuery = Item::where('user_id', $userId);
-
-        $myLostCount = (clone $userItemsQuery)->where('type', 'lost')->count();
-        $myFoundCount = (clone $userItemsQuery)->where('type', 'found')->count();
-        $itemsReturnedCount = (clone $userItemsQuery)->where('status', 'returned')->count();
-
-        $userItemIds = (clone $userItemsQuery)->pluck('id');
-        $activeMatchesCount = SimilarityLog::where(function ($query) use ($userItemIds) {
-            $query->whereIn('lost_item_id', $userItemIds)
-                ->orWhereIn('found_item_id', $userItemIds);
-        })
-            ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->count();
-
-        $recentItems = Item::where('user_id', $userId)
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $recentItemIds = $recentItems->pluck('id');
-        $matchRows = SimilarityLog::where(function ($query) use ($recentItemIds) {
-            $query->whereIn('lost_item_id', $recentItemIds)
-                ->orWhereIn('found_item_id', $recentItemIds);
-        })
-            ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->get(['lost_item_id', 'found_item_id']);
-
-        $matchedItemLookup = [];
-        foreach ($matchRows as $row) {
-            $matchedItemLookup[(int) $row->lost_item_id] = true;
-            $matchedItemLookup[(int) $row->found_item_id] = true;
-        }
-
-        $recentItems = $recentItems->map(function ($item) use ($matchedItemLookup) {
-            $item->has_match = isset($matchedItemLookup[(int) $item->id]);
-            return $item;
-        });
-
-        $myLostItemIds = Item::where('user_id', $userId)
-            ->where('type', 'lost')
-            ->pluck('id');
-
-        $recentMatchCandidates = SimilarityLog::with(['lostItem', 'foundItem'])
-            ->whereIn('lost_item_id', $myLostItemIds)
-            ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->latest()
-            ->take(3)
-            ->get();
-
-        $recentClaims = Claim::with('item')
-            ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->orWhereHas('item', function ($itemQuery) use ($userId) {
-                        $itemQuery->where('user_id', $userId);
-                    });
-            })
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $trustScore = (int) (Auth::user()->trust_score ?? 0);
-
-        return view('student.dashboard', compact(
-            'myLostCount',
-            'myFoundCount',
-            'itemsReturnedCount',
-            'activeMatchesCount',
-            'recentItems',
-            'recentClaims',
-            'recentMatchCandidates',
-            'trustScore'
-        ));
-    }
+    use HasStudentItemCategories;
 
     public function index(Request $request)
     {
@@ -118,18 +35,16 @@ class ItemController extends Controller
         if ($request->location) {
             $query->where('location', 'like', "%{$request->location}%");
         }
-        
-        // Date filter logic
-        if ($request->date == 'today') {
+
+        if ($request->date === 'today') {
             $query->whereDate('created_at', now()->toDateString());
-        } elseif ($request->date == 'week') {
+        } elseif ($request->date === 'week') {
             $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-        } elseif ($request->date == 'month') {
+        } elseif ($request->date === 'month') {
             $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
         }
 
-        // Sort logic
-        if ($request->sort == 'oldest') {
+        if ($request->sort === 'oldest') {
             $query->oldest();
         } else {
             $query->latest();
@@ -148,14 +63,13 @@ class ItemController extends Controller
         return view('student.items.index', compact('items', 'claimedItemIds', 'categories'));
     }
 
-
     public function showLostForm()
     {
         $categories = $this->categories();
 
         return view('student.items.create-lost', compact('categories'));
     }
-    
+
     public function showFoundForm()
     {
         $categories = $this->categories();
@@ -202,7 +116,7 @@ class ItemController extends Controller
         return view('student.items.my-items', compact('items', 'counts'));
     }
 
-    public function postLostItem(Request $request)
+    public function storeLost(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -229,9 +143,9 @@ class ItemController extends Controller
         Item::create($validated);
 
         return redirect()->route('student.my-items')->with('success', 'Posted!');
-}
+    }
 
-    public function postFoundItem(Request $request)
+    public function storeFound(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -257,12 +171,10 @@ class ItemController extends Controller
                 ]);
         }
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             $validated['image_path'] = $request->file('image')->store('items', 'public');
         }
 
-        // Set defaults
         $validated['type'] = 'found';
         $validated['status'] = 'pending_verification';
         $validated['user_id'] = Auth::id();
@@ -275,73 +187,4 @@ class ItemController extends Controller
 
         return redirect()->route('student.my-items')->with('success', 'Posted!');
     }
-
-    public function matches(ItemMatcher $matcher)
-    {
-        $userId = Auth::id();
-        $userItems = Item::where('user_id', $userId)
-            ->whereIn('status', ['active', 'pending_verification'])
-            ->get();
-
-        foreach ($userItems as $item) {
-            $foundMatches = $matcher->findMatches($item);
-            $matcher->saveMatches($item, $foundMatches);
-        }
-
-        $userItemIds = $userItems->pluck('id');
-        
-        $matches = SimilarityLog::where(function($query) use ($userItemIds) {
-                $query->whereIn('lost_item_id', $userItemIds)
-                    ->orWhereIn('found_item_id', $userItemIds);
-            })
-            ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->whereHas('lostItem', function ($query) {
-                $query->where('type', 'lost');
-            })
-            ->whereHas('foundItem', function ($query) {
-                $query->where('type', 'found');
-            })
-            ->with(['lostItem', 'foundItem'])
-            ->latest()
-            ->paginate(10);
-
-        $claimColumns = ['item_id'];
-        if (Schema::hasColumn('claims', 'similarity_log_id')) {
-            $claimColumns[] = 'similarity_log_id';
-        }
-
-        $existingClaims = Claim::where('user_id', $userId)
-            ->whereIn('status', ['pending', 'approved'])
-            ->get($claimColumns);
-
-        return view('student.matches', compact('matches', 'existingClaims'));
-    }
-
-    public function dismissMatch(SimilarityLog $similarityLog): RedirectResponse
-    {
-        $userId = Auth::id();
-
-        $ownsMatchedItem = Item::where('user_id', $userId)
-            ->whereIn('id', [$similarityLog->lost_item_id, $similarityLog->found_item_id])
-            ->exists();
-
-        if (!$ownsMatchedItem) {
-            abort(403, 'You are not allowed to dismiss this match.');
-        }
-
-        DismissedMatch::firstOrCreate([
-            'user_id' => $userId,
-            'similarity_log_id' => $similarityLog->id,
-        ]);
-
-        return redirect()->route('student.matches')->with('success', 'Match removed from your list.');
-    }
-
-    private function categories(): array
-    {
-        return config('items.categories', []);
-    }
-
 }
