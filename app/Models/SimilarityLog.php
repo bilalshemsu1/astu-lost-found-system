@@ -41,4 +41,5 @@ class SimilarityLog extends Model
     {
         return $this->belongsTo(Item::class, 'found_item_id');
     }
+    
 }

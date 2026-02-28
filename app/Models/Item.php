@@ -30,4 +30,9 @@ class Item extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function similarityLogs()
+    {
+        return $this->hasMany(SimilarityLog::class);
+    }
 }
