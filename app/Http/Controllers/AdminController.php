@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -156,6 +157,7 @@ class AdminController extends Controller
 
         return view('admin.matches', array_merge([
             'matches' => $matches,
+            'categories' => $this->categories(),
             'totalMatches' => SimilarityLog::count(),
             'highMatches' => SimilarityLog::where('similarity_percentage', '>=', 90)->count(),
             'mediumMatches' => SimilarityLog::whereBetween('similarity_percentage', [80, 89.99])->count(),
@@ -221,6 +223,7 @@ class AdminController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%')
                     ->orWhere('student_id', 'like', '%' . $search . '%');
             });
         }
@@ -261,6 +264,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'required|string|max:30|min:9',
             'student_id' => 'nullable|string|max:255|unique:users,student_id',
             'role' => ['required', Rule::in(['student', 'admin'])],
             'password' => 'required|string|min:8|confirmed',
@@ -269,6 +273,7 @@ class AdminController extends Controller
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'],
             'student_id' => $validated['student_id'] ?? null,
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
@@ -393,7 +398,7 @@ class AdminController extends Controller
     public function approveClaim(Request $request, Claim $claim): RedirectResponse
     {
         $request->validate([
-            'admin_notes' => 'nullable|string|max:1000',
+            'admin_notes' => 'required|string|min:10|max:1000',
         ]);
 
         if ($claim->status !== 'pending') {
@@ -403,7 +408,7 @@ class AdminController extends Controller
         $claim->update([
             'status' => 'approved',
             'admin_decision' => 'approved',
-            'admin_notes' => $request->string('admin_notes')->toString() ?: null,
+            'admin_notes' => $request->string('admin_notes')->toString(),
         ]);
 
         if ($claim->item) {
@@ -423,20 +428,19 @@ class AdminController extends Controller
     public function rejectClaim(Request $request, Claim $claim): RedirectResponse
     {
         $request->validate([
-            'admin_notes' => 'nullable|string|max:1000',
-            'reason' => 'nullable|string|max:1000',
+            'admin_notes' => 'required|string|min:5|max:1000',
         ]);
 
         if ($claim->status !== 'pending') {
             return redirect()->back()->with('success', 'Claim already processed.');
         }
 
-        $notes = $request->string('admin_notes')->toString() ?: $request->string('reason')->toString();
+        $notes = $request->string('admin_notes')->toString();
 
         $claim->update([
             'status' => 'rejected',
             'admin_decision' => 'rejected',
-            'admin_notes' => $notes !== '' ? $notes : null,
+            'admin_notes' => $notes,
         ]);
 
         if ($claim->user) {
@@ -444,6 +448,17 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', 'Claim rejected successfully.');
+    }
+
+    public function reviewClaim(Claim $claim): View
+    {
+        $claim->load(['user', 'item.user', 'similarityLog.lostItem.user', 'similarityLog.foundItem.user']);
+        $isDirectRequest = !$claim->similarity_log_id;
+
+        return view('admin.claims-review', array_merge([
+            'claim' => $claim,
+            'isDirectRequest' => $isDirectRequest,
+        ], $this->navCounts()));
     }
 
     private function navCounts(): array

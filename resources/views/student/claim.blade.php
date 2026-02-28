@@ -14,7 +14,7 @@
 <x-student-navigation/>
 
 <div class="lg:ml-64 min-h-screen flex flex-col">
-    <x-student-header title="My Claims" trustScore="3" />
+    <x-student-header title="My Claims" />
 
     <main class="flex-1 p-4 sm:p-6">
         @if(session('success'))

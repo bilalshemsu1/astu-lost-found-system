@@ -117,8 +117,8 @@
 
                 <div class="bg-white rounded-xl border border-gray-200 p-4">
                     <h2 class="font-semibold text-gray-900 text-sm sm:text-base mb-2">Trust Score</h2>
-                    <p class="text-2xl font-bold text-green-700">+{{ $trustScore }}</p>
-                    <p class="text-xs text-gray-500 mt-1">Based on approved returns from your found-item posts.</p>
+                    <p class="text-2xl font-bold {{ $trustScore >= 0 ? 'text-green-700' : 'text-red-700' }}">{{ $trustScore >= 0 ? '+' : '' }}{{ $trustScore }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Current trust score based on your verified activity.</p>
                 </div>
             </div>
         </div>

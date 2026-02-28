@@ -64,30 +64,24 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                 @forelse($claims as $claim)
+                    @php
+                        $isDirectRequest = !$claim->similarity_log_id;
+                        $scoreLabel = $isDirectRequest
+                            ? 'Manual Review'
+                            : number_format((float) ($claim->similarity_score ?? 0), 1) . '%';
+                    @endphp
                     <tr>
                         <td class="px-4 py-3 text-gray-900">#{{ $claim->id }}</td>
                         <td class="px-4 py-3 text-gray-900">{{ $claim->item->title ?? 'Unknown item' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $claim->user->name ?? 'Unknown user' }}</td>
                         <td class="px-4 py-3">
-                            <span class="text-xs font-medium px-2 py-0.5 rounded {{ $claim->status === 'approved' ? 'bg-green-50 text-green-700' : ($claim->status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700') }}">{{ ucfirst($claim->status) }}</span>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded {{ $claim->status === 'approved' ? 'bg-green-50 text-green-700' : ($claim->status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700') }}">{{ ucfirst($claim->status) }}</span>
                         </td>
-                        <td class="px-4 py-3 text-gray-600">{{ number_format((float) ($claim->similarity_score ?? 0), 1) }}%</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $scoreLabel }}</td>
                         <td class="px-4 py-3 text-gray-500">{{ $claim->created_at->format('M d, Y') }}</td>
                         <td class="px-4 py-3">
                             @if($claim->status === 'pending')
-                                <div class="flex items-center gap-2">
-                                    <form method="POST" action="{{ route('admin.claims.approve', $claim) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.claims.reject', $claim) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="reason" value="Rejected by admin review">
-                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100">Reject</button>
-                                    </form>
-                                </div>
+                                <a href="{{ route('admin.claims.review', $claim) }}" class="px-2.5 py-1.5 text-xs font-medium bg-primary-600 text-white rounded hover:bg-primary-700">Review</a>
                             @else
                                 <span class="text-xs text-gray-400">Processed</span>
                             @endif
@@ -96,6 +90,8 @@
                     <tr>
                         <td class="px-4 pb-4 text-xs text-gray-500" colspan="7">
                             Proof: {{ \Illuminate\Support\Str::limit($claim->proof, 180) }}
+                            <span class="ml-3">Claimant: {{ $claim->user->phone ?? '-' }}</span>
+                            <span class="ml-3">Holder: {{ $claim->item?->user?->phone ?? '-' }}</span>
                             @if($claim->admin_notes)
                                 <span class="ml-3">Admin Notes: {{ \Illuminate\Support\Str::limit($claim->admin_notes, 120) }}</span>
                             @endif

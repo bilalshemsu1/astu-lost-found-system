@@ -84,12 +84,7 @@ class ItemController extends Controller
             ->take(5)
             ->get();
 
-        $trustScore = Claim::where('status', 'approved')
-            ->whereHas('item', function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->where('type', 'found');
-            })
-            ->count();
+        $trustScore = (int) (Auth::user()->trust_score ?? 0);
 
         return view('student.dashboard', compact(
             'myLostCount',

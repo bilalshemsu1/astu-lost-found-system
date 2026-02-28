@@ -53,11 +53,27 @@
                             <p class="text-xs font-medium text-red-700 uppercase mb-1">Lost Item</p>
                             <p class="font-medium text-gray-900">{{ $match->lostItem->title ?? 'Unknown lost item' }}</p>
                             <p class="text-xs text-gray-500 mt-1">Owner: {{ $match->lostItem->user->name ?? 'Unknown' }}</p>
+                            <p class="text-xs text-gray-500">Category: {{ ($categories[$match->lostItem->category] ?? ucfirst($match->lostItem->category ?? '-')) }}</p>
+                            <p class="text-xs text-gray-500">Location: {{ $match->lostItem->location ?? '-' }}</p>
+                            <p class="text-xs text-gray-500">Date: {{ optional($match->lostItem->item_date)->format('M d, Y') ?? '-' }}</p>
+                            <div class="mt-2 pt-2 border-t border-red-100 text-xs text-gray-600 space-y-1">
+                                <p>Email: {{ $match->lostItem->user->email ?? '-' }}</p>
+                                <p>Phone: {{ $match->lostItem->user->phone ?? '-' }}</p>
+                                <p>Telegram: {{ $match->lostItem->user->telegram_username ? '@' . ltrim($match->lostItem->user->telegram_username, '@') : '-' }}</p>
+                            </div>
                         </div>
                         <div class="rounded-lg border border-green-100 bg-green-50 p-3">
                             <p class="text-xs font-medium text-green-700 uppercase mb-1">Found Item</p>
                             <p class="font-medium text-gray-900">{{ $match->foundItem->title ?? 'Unknown found item' }}</p>
                             <p class="text-xs text-gray-500 mt-1">Owner: {{ $match->foundItem->user->name ?? 'Unknown' }}</p>
+                            <p class="text-xs text-gray-500">Category: {{ ($categories[$match->foundItem->category] ?? ucfirst($match->foundItem->category ?? '-')) }}</p>
+                            <p class="text-xs text-gray-500">Location: {{ $match->foundItem->location ?? '-' }}</p>
+                            <p class="text-xs text-gray-500">Date: {{ optional($match->foundItem->item_date)->format('M d, Y') ?? '-' }}</p>
+                            <div class="mt-2 pt-2 border-t border-green-100 text-xs text-gray-600 space-y-1">
+                                <p>Email: {{ $match->foundItem->user->email ?? '-' }}</p>
+                                <p>Phone: {{ $match->foundItem->user->phone ?? '-' }}</p>
+                                <p>Telegram: {{ $match->foundItem->user->telegram_username ? '@' . ltrim($match->foundItem->user->telegram_username, '@') : '-' }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>

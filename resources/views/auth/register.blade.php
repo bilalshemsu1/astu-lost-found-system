@@ -93,7 +93,7 @@
                             placeholder="Enter your full name"
                             required
                             minlength="2"
-                            value="{{ old('email') }}"
+                            value="{{ old('name') }}"
                     >
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -112,9 +112,28 @@
                             placeholder="Enter your Student Id, Eg: UGR/*****/**"
                             required
                             minlength="2"
-                            value="{{ old('email') }}"
+                            value="{{ old('student_id') }}"
                     >
                     @error('student_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Phone Number
+                    </label>
+                    <input
+                            type="text"
+                            id="phone"
+                            name="phone"
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                            placeholder="e.g., +2519XXXXXXXX"
+                            required
+                            value="{{ old('phone') }}"
+                    >
+                    @error('phone')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
