@@ -39,4 +39,9 @@ class User extends Authenticatable
         return $this->hasMany(Item::class);
     }
 
+    public function routeNotificationForMail(): string
+    {
+        return $this->email;
+    }
+
 }
