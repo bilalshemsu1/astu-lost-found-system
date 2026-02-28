@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class ItemController extends Controller
 {
@@ -105,6 +106,7 @@ class ItemController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $categories = $this->categories();
         $query = Item::with('user')
             ->where('status', 'active')
             ->whereIn('type', ['lost', 'found']);
@@ -115,7 +117,7 @@ class ItemController extends Controller
         if ($request->type) {
             $query->where('type', $request->type);
         }
-        if ($request->category) {
+        if ($request->category && array_key_exists($request->category, $categories)) {
             $query->where('category', $request->category);
         }
         if ($request->location) {
@@ -148,18 +150,22 @@ class ItemController extends Controller
 
         $claimedItemIds = $existingClaimQuery->pluck('item_id');
 
-        return view('student.items.index', compact('items', 'claimedItemIds'));
+        return view('student.items.index', compact('items', 'claimedItemIds', 'categories'));
     }
 
 
     public function showLostForm()
     {
-        return view('student.items.create-lost');
+        $categories = $this->categories();
+
+        return view('student.items.create-lost', compact('categories'));
     }
     
     public function showFoundForm()
     {
-        return view('student.items.create-found');
+        $categories = $this->categories();
+
+        return view('student.items.create-found', compact('categories'));
     }
 
     public function myItems(Request $request)
@@ -206,7 +212,7 @@ class ItemController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'category' => 'required|string|max:100',
+            'category' => ['required', 'string', 'max:100', Rule::in(array_keys($this->categories()))],
             'location' => 'required|string|max:255',
             'item_date' => 'required|date',
             'image' => 'nullable|image|max:2048',
@@ -230,7 +236,7 @@ class ItemController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:100',
+            'category' => ['required', 'string', 'max:100', Rule::in(array_keys($this->categories()))],
             'location' => 'required|string|max:255',
             'item_date' => 'required|date',
             'image' => 'required|image|max:2048',
@@ -312,6 +318,11 @@ class ItemController extends Controller
         ]);
 
         return redirect()->route('student.matches')->with('success', 'Match removed from your list.');
+    }
+
+    private function categories(): array
+    {
+        return config('items.categories', []);
     }
 
 }
