@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Items - ASTU Lost & Found</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
+    <x-common-head-scripts />
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
@@ -65,7 +64,7 @@
 
             <!-- Filters Panel-->
             <div id="filtersPanel"
-                 class="{{ request()->hasAny(['type', 'category', 'date', 'location']) ? 'hidden' : '' }} mt-4 pt-4 border-t border-gray-200">
+                 class="{{ request()->hasAny(['type', 'category', 'date', 'location']) ? '' : 'hidden' }} mt-4 pt-4 border-t border-gray-200">
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                     <!-- Type -->
@@ -460,7 +459,7 @@
 
 
 <!-- ========== SCRIPTS ========== -->
-<script src="{{ asset('js/index.js') }}"></script>
+<x-common-page-scripts />
 <script>
     // Toggle filters panel
     function toggleFilters() {
@@ -680,3 +679,4 @@
 
 </body>
 </html>
+

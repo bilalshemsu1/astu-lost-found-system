@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create User - ASTU Lost & Found Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
+    <x-common-head-scripts />
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
@@ -45,6 +44,10 @@
                     <input type="text" name="student_id" value="{{ old('student_id') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="e.g., ETS12345/15">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Telegram Username (Optional)</label>
+                    <input type="text" name="telegram_username" value="{{ old('telegram_username') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="e.g., @username">
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                     <select name="role" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" required>
                         <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>Student</option>
@@ -70,6 +73,6 @@
     </main>
 </div>
 
-<script src="{{ asset('js/index.js') }}"></script>
+<x-common-page-scripts />
 </body>
 </html>

@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Lost Item - ASTU Lost & Found</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
+    <x-common-head-scripts />
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
 </head>
@@ -226,7 +225,7 @@
 </div>
 
 
-<script src="{{asset('js/index.js')}}"></script>
-<script src="{{asset('js/post.js')}}"></script>
+<x-common-page-scripts :include-post="true" />
 </body>
 </html>
+

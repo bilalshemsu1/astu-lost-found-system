@@ -24,6 +24,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:30|min:9',
             'student_id' => 'required|string|unique:users',
+            'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^@?[A-Za-z0-9_]{5,32}$/'],
             'password' => 'required|confirmed|min:8',
         ]);
 
@@ -35,6 +36,7 @@ class AuthController extends Controller
 
         // If passed: proceed
         $validated = $validator->validated();
+        $validated['telegram_username'] = $this->normalizeTelegramUsername($validated['telegram_username'] ?? null);
         $validated['password'] = bcrypt($validated['password']);
         
         $user = User::create($validated);
@@ -44,6 +46,17 @@ class AuthController extends Controller
         }
 
         return redirect()->route('login')->with('success', 'Account Created Successfully! Please Login!');
+    }
+
+    private function normalizeTelegramUsername(?string $username): ?string
+    {
+        if ($username === null) {
+            return null;
+        }
+
+        $cleaned = ltrim(trim($username), '@');
+
+        return $cleaned !== '' ? $cleaned : null;
     }
 
 

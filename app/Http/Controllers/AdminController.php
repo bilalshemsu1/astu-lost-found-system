@@ -267,6 +267,7 @@ class AdminController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'required|string|max:30|min:9',
             'student_id' => 'nullable|string|max:255|unique:users,student_id',
+            'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^@?[A-Za-z0-9_]{5,32}$/'],
             'role' => ['required', Rule::in(['student', 'admin'])],
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -276,6 +277,7 @@ class AdminController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'student_id' => $validated['student_id'] ?? null,
+            'telegram_username' => $this->normalizeTelegramUsername($validated['telegram_username'] ?? null),
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
             'trust_score' => 0,
@@ -536,5 +538,16 @@ class AdminController extends Controller
     private function categories(): array
     {
         return config('items.categories', []);
+    }
+
+    private function normalizeTelegramUsername(?string $username): ?string
+    {
+        if ($username === null) {
+            return null;
+        }
+
+        $cleaned = ltrim(trim($username), '@');
+
+        return $cleaned !== '' ? $cleaned : null;
     }
 }
