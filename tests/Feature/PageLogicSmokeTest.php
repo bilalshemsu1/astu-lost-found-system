@@ -143,4 +143,48 @@ class PageLogicSmokeTest extends TestCase
             'trust_score' => 0,
         ]);
     }
+
+    public function test_admin_sees_item_descriptions_on_review_pages(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        // similarity claim should show both lost and found descriptions
+        $response = $this->get(route('admin.claims.review', $this->claim));
+        $response->assertSee('Contains notebooks and charger.');
+        $response->assertSee('Found near the library entrance.');
+        $response->assertSee('Bag'); // category label or fallback
+        $response->assertSee('Library'); // location of both items
+
+        // create a direct claim (no similarity log) and ensure its full details are visible
+        $directItem = Item::create([
+            'title' => 'Green Wallet',
+            'description' => 'Leather wallet with student ID.',
+            'category' => 'accessories',
+            'type' => 'found',
+            'status' => 'active',
+            'verification_status' => 'approved',
+            'location' => 'Cafeteria',
+            'item_date' => now()->toDateString(),
+            'user_id' => $this->otherStudentUser->id,
+            'share_phone' => true,
+            'share_telegram' => true,
+            'return_location_preference' => 'admin_office',
+        ]);
+
+        $directClaim = Claim::create([
+            'item_id' => $directItem->id,
+            'user_id' => $this->studentUser->id,
+            'similarity_score' => 0,
+            'proof' => 'I dropped my wallet yesterday.',
+            'status' => 'pending',
+        ]);
+
+        $response2 = $this->get(route('admin.claims.review', $directClaim));
+        $response2->assertSee('Item Comparison');
+        $response2->assertSee('Leather wallet with student ID.');
+        // title should appear twice (once per column)
+        $response2->assertSeeTextInOrder(['Green Wallet','Green Wallet']);
+        $response2->assertSee('Accessories');
+        $response2->assertSee('Cafeteria');
+    }
 }

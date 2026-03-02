@@ -24,6 +24,8 @@
             $handoverPending = $claim->status === 'approved' && !$handoverConfirmed;
             $allowsDirectContact = (bool) $claim->claimResponse?->finder_shares_contact;
             $handoverModeLabel = $allowsDirectContact ? 'Direct Contact Allowed' : 'Admin Office Handover';
+
+            $categoryLabels = config('items.categories', []);
         @endphp
 
         @if($errors->any())
@@ -68,6 +70,8 @@
                     <p class="text-sm text-gray-700 whitespace-pre-line">{{ $claim->proof }}</p>
                 </div>
 
+                
+
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="bg-white rounded-xl border border-gray-200 p-4">
                         <h3 class="font-semibold text-gray-900 mb-2">Claimant Contact</h3>
@@ -89,23 +93,44 @@
                     </div>
                 </div>
 
-                @if(!$isDirectRequest && $claim->similarityLog)
-                    <div class="bg-white rounded-xl border border-gray-200 p-4">
-                        <h3 class="font-semibold text-gray-900 mb-2">Match Context</h3>
-                        <div class="grid md:grid-cols-2 gap-3 text-sm">
-                            <div class="rounded-lg border border-red-100 bg-red-50 p-3">
-                                <p class="text-xs font-medium text-red-700 uppercase mb-1">Lost Item</p>
-                                <p class="font-medium text-gray-900">{{ $claim->similarityLog->lostItem->title ?? 'Unknown' }}</p>
-                                <p class="text-xs text-gray-600 mt-1">Owner: {{ $claim->similarityLog->lostItem->user->name ?? 'Unknown' }}</p>
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">Item Comparison</h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        @php
+                            if ($claim->similarityLog) {
+                                $left = $claim->similarityLog->lostItem;
+                                $right = $claim->similarityLog->foundItem;
+                                $leftLabel = 'Lost Item';
+                                $rightLabel = 'Found Item';
+                                $leftBg = 'red';
+                                $rightBg = 'green';
+                            } else {
+                                $left = $claim->item;
+                                $right = $claim->item;
+                                $leftLabel = $rightLabel = 'Claimed Item';
+                                $leftBg = $rightBg = 'gray';
+                            }
+                        @endphp
+
+                        @foreach (['left' => $left, 'right' => $right] as $side => $itm)
+                            <div class="space-y-2 rounded-lg border border-{{$side === 'left' ? $leftBg : $rightBg}}-100 bg-{{$side === 'left' ? $leftBg : $rightBg}}-50 p-3">
+                                <p class="text-xs font-medium text-{{$side === 'left' ? $leftBg : $rightBg}}-700 uppercase">
+                                    {{ ${$side.'Label'} }}
+                                </p>
+                                <p class="font-medium text-gray-900">{{ $itm->title ?? 'Unknown' }}</p>
+                                <p class="text-xs text-gray-600">Category: {{ $categoryLabels[$itm->category] ?? ucfirst($itm->category) }}</p>
+                                <p class="text-xs text-gray-600">Location: {{ $itm->location ?? '-' }}</p>
+                                <p class="text-xs text-gray-600">Date: {{ optional($itm->created_at)->format('M d, Y') }}</p>
+                                @if($itm->image_path)
+                                    <img src="{{ asset('storage/' . $itm->image_path) }}" alt="{{ $itm->title }}" class="mt-1 w-full h-32 object-cover rounded">
+                                @endif
+                                @if($itm->description)
+                                    <p class="mt-2 text-sm text-gray-700">{{ $itm->description }}</p>
+                                @endif
                             </div>
-                            <div class="rounded-lg border border-green-100 bg-green-50 p-3">
-                                <p class="text-xs font-medium text-green-700 uppercase mb-1">Found Item</p>
-                                <p class="font-medium text-gray-900">{{ $claim->similarityLog->foundItem->title ?? 'Unknown' }}</p>
-                                <p class="text-xs text-gray-600 mt-1">Owner: {{ $claim->similarityLog->foundItem->user->name ?? 'Unknown' }}</p>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
-                @endif
+                </div>
             </div>
 
             <div class="space-y-4">
