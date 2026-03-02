@@ -36,6 +36,11 @@ class MatchesController extends Controller
                 $query->whereIn('lost_item_id', $userItemIds)
                     ->orWhereIn('found_item_id', $userItemIds);
             })
+            // filter out matches where both items are owned by current user
+            ->where(function ($q) use ($userItemIds) {
+                $q->whereNotIn('lost_item_id', $userItemIds)
+                  ->orWhereNotIn('found_item_id', $userItemIds);
+            })
             ->whereDoesntHave('dismissedMatches', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
