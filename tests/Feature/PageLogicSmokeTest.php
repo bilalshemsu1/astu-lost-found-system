@@ -94,6 +94,67 @@ class PageLogicSmokeTest extends TestCase
         $this->get(route('student.claims'))->assertOk();
     }
 
+    public function test_nav_shows_match_count_for_user(): void
+    {
+        $this->actingAs($this->studentUser);
+
+        // page load should include count badge (value 1 from setUp match)
+        $html = $this->get(route('student.dashboard'))->assertOk()->getContent();
+        $this->assertStringContainsString('ml-auto bg-primary-100', $html); // badge styling
+        $this->assertStringContainsString('1', $html);
+
+        // visiting matches page should still show the count
+        $html = $this->get(route('student.matches'))->assertOk()->getContent();
+        $this->assertStringContainsString('1', $html);
+
+        // create a self-match: both lost and found items belong to studentUser
+        $selfLost = Item::create([
+            'title' => 'Self Lost',
+            'description' => 'Data',
+            'category' => 'other',
+            'type' => 'lost',
+            'status' => 'active',
+            'verification_status' => 'approved',
+            'location' => 'Library',
+            'item_date' => now()->toDateString(),
+            'user_id' => $this->studentUser->id,
+            'share_phone' => true,
+            'share_telegram' => true,
+        ]);
+        $selfFound = Item::create([
+            'title' => 'Self Found',
+            'description' => 'Data',
+            'category' => 'other',
+            'type' => 'found',
+            'status' => 'active',
+            'verification_status' => 'approved',
+            'location' => 'Cafeteria',
+            'item_date' => now()->toDateString(),
+            'user_id' => $this->studentUser->id,
+            'share_phone' => true,
+            'share_telegram' => true,
+        ]);
+        SimilarityLog::create([
+            'lost_item_id' => $selfLost->id,
+            'found_item_id' => $selfFound->id,
+            'similarity_percentage' => 50,
+            'title_match' => 50,
+            'category_match' => 50,
+            'description_match' => 50,
+            'location_match' => 50,
+            'date_match' => 50,
+            'notified' => false,
+        ]);
+
+        // reload pages – badge should stay 1 and self match not visible
+        $html = $this->get(route('student.dashboard'))->assertOk()->getContent();
+        $this->assertStringContainsString('1', $html);
+
+        $matchesPage = $this->get(route('student.matches'))->assertOk()->getContent();
+        $this->assertStringNotContainsString('Self Lost', $matchesPage);
+        $this->assertStringNotContainsString('Self Found', $matchesPage);
+    }
+
     public function test_admin_pages_render_successfully(): void
     {
         $this->actingAs($this->adminUser);
