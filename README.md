@@ -356,10 +356,9 @@ sudo systemctl restart apache2
 
 ## 🙏 Acknowledgments
 
-- 🏛️ **ASTU University** for the inspiration
-- 🛠️ **Laravel Community** for the amazing framework
+- 🏛️ **ASTU Stem** for the inspiration
+- 🛠️ **Laravel** for the amazing Framework
 - 🎨 **Tailwind CSS** for beautiful styling
-- 🤝 All contributors who help improve this project
 
 
 
