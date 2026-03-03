@@ -38,7 +38,7 @@
 |---------|-------------|
 | 📝 **Report Lost Items** | Post details about items you've lost with photos, location, and date |
 | 📦 **Report Found Items** | Help others by reporting items you found on campus |
-| 🔔 **Smart Matching** | Get notified via Telegram/Email when similar items are found |
+| 🔔 **Smart Matching** | Get notified via Email when similar items are found |
 | 📋 **Claim System** | Request to claim items that match yours with proof |
 | ⭐ **Trust Score** | Build your reputation through verified claims and returns |
 
