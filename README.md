@@ -298,21 +298,6 @@ App\Models\User::create([
 
 ---
 
-## 🧪 Running Tests
-
-```bash
-# Run all tests
-php artisan test
-
-# Run specific test file
-php artisan test tests/Feature/SimilarityMatchNotificationTest.php
-
-# Run with coverage
-php artisan test --coverage
-```
-
----
-
 ## 📝 API Endpoints
 
 | Method | Endpoint | Description | Auth |
