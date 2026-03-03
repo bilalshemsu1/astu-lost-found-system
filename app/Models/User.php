@@ -11,17 +11,13 @@ class User extends Authenticatable
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'student_id',
-        'password',
-        'telegram_chat_id',
-        'telegram_username',
-        'telegram_verification_code',
-        'telegram_verified_at',
-        'role',
-        'trust_score',
+        'name', 'email', 'phone', 'student_id', 
+        'password', 'telegram_chat_id', 'telegram_username',
+    ];
+
+    protected $guarded = [
+        'id', 'role', 'trust_score', 
+        'telegram_verification_code', 'telegram_verified_at',
     ];
 
     protected $hidden = [
