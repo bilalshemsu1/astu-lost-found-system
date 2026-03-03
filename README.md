@@ -369,17 +369,6 @@ sudo a2ensite astu-lost-found
 sudo systemctl restart apache2
 ```
 
----
-
-## 📊 Screenshots
-
-| Dashboard | Items | Matches |
-|-----------|-------|---------|
-| 📊 Student Dashboard | 📦 Item Listing | 🔗 Match Results |
-| 🛡️ Admin Dashboard | ✅ Admin Controls | 📈 Analytics |
-
----
-
 ## 🙏 Acknowledgments
 
 - 🏛️ **ASTU University** for the inspiration
@@ -387,35 +376,7 @@ sudo systemctl restart apache2
 - 🎨 **Tailwind CSS** for beautiful styling
 - 🤝 All contributors who help improve this project
 
----
 
-## 📞 Support
-
-Having issues? 
-
-1. 📖 Check the [Wiki](https://github.com/bilalshemsu1/astu-lost-found-system/wiki)
-2. 🐛 [Open an Issue](https://github.com/bilalshemsu1/astu-lost-found-system/issues)
-3. 💬 Ask in discussions
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. 🍴 **Fork** the repository
-2. 🌿 **Create** your feature branch (`git checkout -b feature/amazing-feature`)
-3. 📝 **Commit** your changes (`git commit -m 'Add some amazing-feature'`)
-4. 🚀 **Push** to the branch (`git push origin feature/amazing-feature`)
-5. 🔃 **Open** a Pull Request
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 👤 Author
 
@@ -426,14 +387,14 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
   <a href="https://t.me/bilalshemsu">
     <img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram">
   </a>
-  <a href="mailto:bilalshemsu1@gmail.com">
+  <a href="mailto:bilalshemsu4@gmail.com">
     <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
   </a>
 </p>
 
 <p align="center">
   <strong>Bilal Shemsu</strong><br>
-  <sub>Full Stack Developer | Laravel Enthusiast</sub>
+  <sub>Full Stack Developer | Laravel | ASTU Student</sub>
 </p>
 
 ---
