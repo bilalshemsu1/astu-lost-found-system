@@ -58,7 +58,6 @@ class ItemMatcher
         foreach ($candidates as $candidate) {
             $scores = $this->calculateSimilarity($item, $candidate);
             
-            // Match threshold is tuned for recall/precision balance.
             if ($scores['total'] >= $this->threshold) {
                 $matches[] = [
                     'candidate' => $candidate,

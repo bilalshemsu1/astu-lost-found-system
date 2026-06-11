@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+tests/Feature/SimilarityMatchNotificationTest.php
+tests/Feature/SimilarityMatchNotificationTest.php
+tests/Feature/PageLogicSmokeTest.php
